@@ -131,3 +131,7 @@ volumes:
   pg_data:
   minio_data:
   prometheus_data:
+
+networks:
+  default:
+    enable_ipv6: true

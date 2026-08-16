@@ -2,11 +2,12 @@ SHELL := /bin/sh
 
 .DEFAULT_GOAL := help
 
-.PHONY: help up down restart build logs ps migrate test lint lint-backend lint-frontend check
+.PHONY: help up deploy-server down restart build logs ps migrate test lint lint-backend lint-frontend check
 
 help:
 	@printf '%s\n' \
 		'make up             Build and start the complete application' \
+		'make deploy-server  Configure Docker IPv6 and deploy on Ubuntu' \
 		'make down           Stop the application' \
 		'make restart        Restart running services' \
 		'make build          Build all Docker images' \
@@ -19,6 +20,9 @@ help:
 
 up:
 	docker compose up --build -d
+
+deploy-server:
+	./scripts/deploy-server.sh
 
 down:
 	docker compose down
