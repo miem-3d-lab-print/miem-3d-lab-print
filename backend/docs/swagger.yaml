@@ -1,0 +1,1654 @@
+basePath: /
+definitions:
+  miem_3d_lab_print_backend_src_internal_apierr.APIError:
+    properties:
+      code:
+        example: INTERNAL_ERROR
+        type: string
+      details:
+        type: object
+      message:
+        example: Внутренняя ошибка сервера
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.APIError'
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.AdminApplicant:
+    properties:
+      max:
+        type: string
+      snapshot_email:
+        type: string
+      snapshot_full_name:
+        type: string
+      telegram:
+        type: string
+      user_id:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.AdminApplicationListItem:
+    properties:
+      created_at:
+        type: string
+      deadline_soon:
+        type: boolean
+      desired_date:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: string
+      material_name:
+        type: string
+      number:
+        type: string
+      status:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.AdminApplicationListResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.AdminApplicationListItem'
+        type: array
+      meta:
+        $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.PaginationMeta'
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.AdminUserItem:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: string
+      role:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.AdminUsersResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.AdminUserItem'
+        type: array
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.ApplicationDetailAdmin:
+    properties:
+      applicant:
+        $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.AdminApplicant'
+      color:
+        $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.ColorRef'
+      color_matters:
+        type: boolean
+      comment:
+        type: string
+      created_at:
+        type: string
+      desired_date:
+        type: string
+      files:
+        items:
+          $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.FileItem'
+        type: array
+      id:
+        type: string
+      material:
+        $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.MaterialRefAdmin'
+      number:
+        type: string
+      position:
+        type: string
+      purpose:
+        type: string
+      rejection_reason:
+        type: string
+      status:
+        type: string
+      status_history:
+        items:
+          $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.StatusHistoryItemAdmin'
+        type: array
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.ApplicationDetailUser:
+    properties:
+      color:
+        $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.ColorRef'
+      color_matters:
+        type: boolean
+      comment:
+        type: string
+      created_at:
+        type: string
+      desired_date:
+        type: string
+      files:
+        items:
+          $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.FileItem'
+        type: array
+      files_delete_after:
+        type: string
+      id:
+        type: string
+      material:
+        $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.MaterialRef'
+      number:
+        type: string
+      position:
+        type: string
+      purpose:
+        type: string
+      rejection_reason:
+        type: string
+      status:
+        type: string
+      status_history:
+        items:
+          $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.StatusHistoryItemUser'
+        type: array
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.ApplicationListItem:
+    properties:
+      color_name:
+        type: string
+      created_at:
+        type: string
+      desired_date:
+        type: string
+      files_count:
+        type: integer
+      id:
+        type: string
+      material_name:
+        type: string
+      number:
+        type: string
+      status:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.ApplicationListResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.ApplicationListItem'
+        type: array
+      meta:
+        $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.PaginationMeta'
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.ByMaterialStat:
+    properties:
+      count:
+        type: integer
+      material_name:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.CancelApplicationResponse:
+    properties:
+      files_delete_after:
+        type: string
+      id:
+        type: string
+      status:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.ChangeStatusRequest:
+    properties:
+      comment:
+        type: string
+      rejection_reason:
+        type: string
+      status:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.ChangeStatusResponse:
+    properties:
+      files_delete_after:
+        type: string
+      id:
+        type: string
+      status:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.ColorRef:
+    properties:
+      id:
+        type: string
+      snapshot_name:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.ColorResponse:
+    properties:
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.ConsentResponse:
+    properties:
+      consent_date:
+        type: string
+      consent_given:
+        type: boolean
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.CreateApplicationResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      number:
+        type: string
+      status:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.CreateColorRequest:
+    properties:
+      is_active:
+        type: boolean
+      name:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.CreateMaterialRequest:
+    properties:
+      description:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.FileItem:
+    properties:
+      filename:
+        type: string
+      format:
+        type: string
+      id:
+        type: string
+      size:
+        type: integer
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.LogoutRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.MaterialRef:
+    properties:
+      id:
+        type: string
+      snapshot_name:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.MaterialRefAdmin:
+    properties:
+      id:
+        type: string
+      is_active_now:
+        type: boolean
+      snapshot_name:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.MaterialResponse:
+    properties:
+      colors:
+        items:
+          $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.ColorResponse'
+        type: array
+      description:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.PaginationMeta:
+    properties:
+      page:
+        type: integer
+      per_page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.PatchColorRequest:
+    properties:
+      is_active:
+        type: boolean
+      name:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.PatchMaterialRequest:
+    properties:
+      description:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.PatchProfileRequest:
+    properties:
+      full_name:
+        type: string
+      max:
+        type: string
+      telegram:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.ProfileResponse:
+    properties:
+      consent_date:
+        type: string
+      consent_given:
+        type: boolean
+      created_at:
+        type: string
+      email:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: string
+      max:
+        type: string
+      role:
+        type: string
+      telegram:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.RefreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.RefreshResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      refresh_token:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.RequestOTPRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.RequestOTPResponse:
+    properties:
+      expires_in:
+        type: integer
+      message:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.SetRoleRequest:
+    properties:
+      role:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.SetRoleResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      role:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.StatsResponse:
+    properties:
+      avg_completion_hours:
+        type: number
+      by_material:
+        items:
+          $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.ByMaterialStat'
+        type: array
+      by_status_current:
+        additionalProperties:
+          type: integer
+        type: object
+      completed_count:
+        type: integer
+      period:
+        properties:
+          date_from:
+            type: string
+          date_to:
+            type: string
+        type: object
+      total_applications:
+        type: integer
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.StatusHistoryChangedBy:
+    properties:
+      full_name:
+        type: string
+      id:
+        type: string
+      role:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.StatusHistoryItemAdmin:
+    properties:
+      changed_by:
+        $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.StatusHistoryChangedBy'
+      comment:
+        type: string
+      created_at:
+        type: string
+      status:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.StatusHistoryItemUser:
+    properties:
+      changed_by_role:
+        type: string
+      comment:
+        type: string
+      created_at:
+        type: string
+      status:
+        type: string
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.UploadFileResponse:
+    properties:
+      created_at:
+        type: string
+      filename:
+        type: string
+      format:
+        type: string
+      id:
+        type: string
+      size:
+        type: integer
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.VerifyOTPRequest:
+    properties:
+      code:
+        type: string
+      email:
+        type: string
+    required:
+    - code
+    - email
+    type: object
+  miem_3d_lab_print_backend_src_internal_dto.VerifyOTPResponse:
+    properties:
+      access_token:
+        type: string
+      consent_required:
+        type: boolean
+      expires_in:
+        type: integer
+      refresh_token:
+        type: string
+      role:
+        type: string
+      token_type:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: REST API сервиса подачи заявок на 3D-печать МИЭМ НИУ ВШЭ.\nАутентификация
+    — OTP через email + JWT (Bearer token).
+  title: MIEM 3D Lab Print API
+  version: 1.0.0
+paths:
+  /api/admin/applications:
+    get:
+      parameters:
+      - collectionFormat: multi
+        description: Фильтр по статусам
+        in: query
+        items:
+          enum:
+          - new
+          - in_review
+          - printing
+          - ready
+          - issued
+          - rejected
+          - cancelled
+          type: string
+        name: status
+        type: array
+      - description: Поиск по имени / email
+        in: query
+        name: search
+        type: string
+      - description: UUID материала
+        format: uuid
+        in: query
+        name: material_id
+        type: string
+      - description: Дата создания от (YYYY-MM-DD)
+        in: query
+        name: created_from
+        type: string
+      - description: Дата создания до (YYYY-MM-DD)
+        in: query
+        name: created_to
+        type: string
+      - description: Желаемая дата от (YYYY-MM-DD)
+        in: query
+        name: desired_from
+        type: string
+      - description: Желаемая дата до (YYYY-MM-DD)
+        in: query
+        name: desired_to
+        type: string
+      - default: 1
+        description: Страница
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Записей на странице
+        in: query
+        maximum: 100
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.AdminApplicationListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Список всех заявок (admin)
+      tags:
+      - admin-applications
+  /api/admin/applications/{id}:
+    get:
+      parameters:
+      - description: ID заявки
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.ApplicationDetailAdmin'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Детали заявки (admin)
+      tags:
+      - admin-applications
+  /api/admin/applications/{id}/files/{file_id}:
+    get:
+      parameters:
+      - description: ID заявки
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ID файла
+        format: uuid
+        in: path
+        name: file_id
+        required: true
+        type: string
+      responses:
+        "302":
+          description: Found
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "410":
+          description: Файл удалён
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Скачать файл заявки (admin)
+      tags:
+      - admin-applications
+  /api/admin/applications/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID заявки
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Новый статус
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.ChangeStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.ChangeStatusResponse'
+        "400":
+          description: Невалидный статус / отсутствует обязательное поле
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "409":
+          description: Заявка в финальном статусе
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Изменить статус заявки (admin)
+      tags:
+      - admin-applications
+  /api/admin/materials:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: items
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.MaterialResponse'
+              type: array
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Все материалы (admin)
+      tags:
+      - admin-materials
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные материала
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.CreateMaterialRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.MaterialResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "409":
+          description: Материал с таким названием уже существует
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Создать материал (admin)
+      tags:
+      - admin-materials
+  /api/admin/materials/{id}:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID материала
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Изменяемые поля
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.PatchMaterialRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.MaterialResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "409":
+          description: Название уже занято
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Обновить материал (admin)
+      tags:
+      - admin-materials
+  /api/admin/materials/{id}/colors:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID материала
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Данные цвета
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.CreateColorRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.ColorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "409":
+          description: Цвет с таким названием уже существует
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Добавить цвет к материалу (admin)
+      tags:
+      - admin-materials
+  /api/admin/materials/{id}/colors/{color_id}:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID материала
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ID цвета
+        format: uuid
+        in: path
+        name: color_id
+        required: true
+        type: string
+      - description: Изменяемые поля
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.PatchColorRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.ColorResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "409":
+          description: Название уже занято
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Обновить цвет (admin)
+      tags:
+      - admin-materials
+  /api/admin/stats:
+    get:
+      parameters:
+      - description: Начало периода (YYYY-MM-DD)
+        in: query
+        name: date_from
+        type: string
+      - description: Конец периода (YYYY-MM-DD)
+        in: query
+        name: date_to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.StatsResponse'
+        "400":
+          description: Некорректный период
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Статистика (admin)
+      tags:
+      - admin-stats
+  /api/admin/users:
+    get:
+      parameters:
+      - description: Минимум 3 символа
+        in: query
+        minLength: 3
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.AdminUsersResponse'
+        "400":
+          description: Запрос слишком короткий
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Поиск пользователей по email (admin)
+      tags:
+      - admin-users
+  /api/admin/users/{id}/role:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID пользователя
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Новая роль
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.SetRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.SetRoleResponse'
+        "400":
+          description: Недопустимое значение роли
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "409":
+          description: Нельзя снять роль с последнего администратора
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Изменить роль пользователя (admin)
+      tags:
+      - admin-users
+  /api/applications:
+    get:
+      parameters:
+      - description: Фильтр по статусу
+        enum:
+        - new
+        - in_review
+        - printing
+        - ready
+        - issued
+        - rejected
+        - cancelled
+        in: query
+        name: status
+        type: string
+      - default: 1
+        description: Страница
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Записей на странице
+        in: query
+        maximum: 100
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.ApplicationListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "403":
+          description: Требуется согласие
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Список заявок пользователя
+      tags:
+      - applications
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: Должность / группа заявителя
+        in: formData
+        name: position
+        required: true
+        type: string
+      - description: Цель печати
+        in: formData
+        name: purpose
+        required: true
+        type: string
+      - description: UUID материала
+        format: uuid
+        in: formData
+        name: material_id
+        required: true
+        type: string
+      - description: Важен ли цвет
+        in: formData
+        name: color_matters
+        required: true
+        type: boolean
+      - description: UUID цвета (обязателен если color_matters=true)
+        format: uuid
+        in: formData
+        name: color_id
+        type: string
+      - description: Желаемая дата получения (YYYY-MM-DD)
+        in: formData
+        name: desired_date
+        required: true
+        type: string
+      - description: Комментарий
+        in: formData
+        name: comment
+        type: string
+      - description: Файлы моделей (STL / STEP / 3MF, до 20 МБ каждый)
+        in: formData
+        name: files[]
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.CreateApplicationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "403":
+          description: Требуется согласие
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "409":
+          description: Профиль не заполнен / лимит заявок / материал недоступен
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "413":
+          description: Файл слишком большой
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "422":
+          description: Ошибка валидации
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Создать заявку
+      tags:
+      - applications
+  /api/applications/{id}:
+    get:
+      parameters:
+      - description: ID заявки
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.ApplicationDetailUser'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "403":
+          description: Требуется согласие
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Получить заявку
+      tags:
+      - applications
+  /api/applications/{id}/cancel:
+    patch:
+      parameters:
+      - description: ID заявки
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.CancelApplicationResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "403":
+          description: Требуется согласие
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "409":
+          description: Отмена невозможна
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Отменить заявку
+      tags:
+      - applications
+  /api/applications/{id}/files:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: ID заявки
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Файл модели (STL / STEP / 3MF, до 20 МБ)
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.UploadFileResponse'
+        "400":
+          description: Файл не передан или неверный формат
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "403":
+          description: Требуется согласие
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "409":
+          description: Заявка не в статусе new
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "413":
+          description: Файл слишком большой
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Добавить файл к заявке
+      tags:
+      - applications
+  /api/applications/{id}/files/{file_id}:
+    get:
+      parameters:
+      - description: ID заявки
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ID файла
+        format: uuid
+        in: path
+        name: file_id
+        required: true
+        type: string
+      responses:
+        "302":
+          description: Found
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "403":
+          description: Требуется согласие
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "410":
+          description: Файл удалён
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Скачать файл (редирект на presigned URL)
+      tags:
+      - applications
+  /api/auth/logout:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Refresh token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.LogoutRequest'
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      summary: Выйти (отозвать refresh token)
+      tags:
+      - auth
+  /api/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Refresh token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.RefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.RefreshResponse'
+        "401":
+          description: Невалидный/просроченный/отозванный token
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      summary: Обновить токены
+      tags:
+      - auth
+  /api/auth/request-otp:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Email адрес
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.RequestOTPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.RequestOTPResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "429":
+          description: Превышен лимит запросов
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      summary: Запросить OTP-код
+      tags:
+      - auth
+  /api/auth/verify-otp:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Email + OTP-код
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.VerifyOTPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.VerifyOTPResponse'
+        "400":
+          description: Неверный или истёкший код
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "404":
+          description: OTP не найден
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "423":
+          description: Слишком много попыток
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      summary: Подтвердить OTP-код
+      tags:
+      - auth
+  /api/materials:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: items
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.MaterialResponse'
+              type: array
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "403":
+          description: Требуется согласие
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Список доступных материалов
+      tags:
+      - materials
+  /api/profile:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.ProfileResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "404":
+          description: Профиль не найден
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Получить профиль
+      tags:
+      - profile
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Изменяемые поля
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.PatchProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.ProfileResponse'
+        "400":
+          description: Ошибка валидации
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "403":
+          description: Требуется согласие
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Обновить профиль
+      tags:
+      - profile
+  /api/profile/consent:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_dto.ConsentResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Дать согласие на обработку данных
+      tags:
+      - profile
+securityDefinitions:
+  BearerAuth:
+    description: Введите "Bearer <access_token>"
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
