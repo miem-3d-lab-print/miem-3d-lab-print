@@ -83,6 +83,7 @@ services:
       SMTP_USERNAME: ${SMTP_USERNAME:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       SMTP_FROM: ${SMTP_FROM:-noreply@miem-3d-lab.local}
+      SITE_URL: ${SITE_URL:-http://localhost:3000}
       CORS_ALLOWED_ORIGINS: ""
       TRUST_PROXY: "true"
       HTTP_ADDRESS: ":8080"
@@ -112,25 +113,9 @@ services:
       timeout: 5s
       retries: 10
 
-  prometheus:
-    image: prom/prometheus:v3.5.0
-    restart: unless-stopped
-    command:
-      - --config.file=/etc/prometheus/prometheus.yml
-      - --storage.tsdb.path=/prometheus
-    volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus_data:/prometheus
-    expose:
-      - "9090"
-    depends_on:
-      backend:
-        condition: service_healthy
-
 volumes:
   pg_data:
   minio_data:
-  prometheus_data:
 
 networks:
   default:

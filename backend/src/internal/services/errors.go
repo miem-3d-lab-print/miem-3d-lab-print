@@ -144,6 +144,14 @@ type ErrFilesRequired struct{}
 
 func (e *ErrFilesRequired) Error() string { return "FILES_REQUIRED" }
 
+type ErrInvalidApplicationTitle struct{}
+
+func (e *ErrInvalidApplicationTitle) Error() string { return "INVALID_APPLICATION_TITLE" }
+
+type ErrInvalidFileURL struct{}
+
+func (e *ErrInvalidFileURL) Error() string { return "INVALID_FILE_URL" }
+
 type ErrInvalidFileFormat struct {
 	Filename string
 }

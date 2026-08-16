@@ -31,6 +31,7 @@ type PaginationMeta struct {
 type ApplicationListItem struct {
 	ID           string    `json:"id"`
 	Number       string    `json:"number"`
+	Title        string    `json:"title"`
 	Status       string    `json:"status"`
 	MaterialName string    `json:"material_name"`
 	ColorName    *string   `json:"color_name"`
@@ -71,6 +72,7 @@ type ColorRef struct {
 type ApplicationDetailUser struct {
 	ID               string                   `json:"id"`
 	Number           string                   `json:"number"`
+	Title            string                   `json:"title"`
 	Status           string                   `json:"status"`
 	RejectionReason  *string                  `json:"rejection_reason"`
 	Position         string                   `json:"position"`
@@ -80,6 +82,7 @@ type ApplicationDetailUser struct {
 	Color            *ColorRef                `json:"color"`
 	DesiredDate      string                   `json:"desired_date"`
 	Comment          *string                  `json:"comment"`
+	FileURL          *string                  `json:"file_url"`
 	Files            []*FileItem              `json:"files"`
 	FilesDeleteAfter *time.Time               `json:"files_delete_after"`
 	StatusHistory    []*StatusHistoryItemUser `json:"status_history"`
@@ -89,6 +92,7 @@ type ApplicationDetailUser struct {
 type CreateApplicationResponse struct {
 	ID        string    `json:"id"`
 	Number    string    `json:"number"`
+	Title     string    `json:"title"`
 	Status    string    `json:"status"`
 	CreatedAt time.Time `json:"created_at"`
 }
@@ -131,6 +135,7 @@ type StatusHistoryItemAdmin struct {
 type ApplicationDetailAdmin struct {
 	ID              string                    `json:"id"`
 	Number          string                    `json:"number"`
+	Title           string                    `json:"title"`
 	Applicant       AdminApplicant            `json:"applicant"`
 	Position        string                    `json:"position"`
 	Purpose         string                    `json:"purpose"`
@@ -139,6 +144,7 @@ type ApplicationDetailAdmin struct {
 	Color           *ColorRef                 `json:"color"`
 	DesiredDate     string                    `json:"desired_date"`
 	Comment         *string                   `json:"comment"`
+	FileURL         *string                   `json:"file_url"`
 	Status          string                    `json:"status"`
 	RejectionReason *string                   `json:"rejection_reason"`
 	Files           []*FileItem               `json:"files"`
@@ -149,6 +155,7 @@ type ApplicationDetailAdmin struct {
 type AdminApplicationListItem struct {
 	ID           string    `json:"id"`
 	Number       string    `json:"number"`
+	Title        string    `json:"title"`
 	FullName     string    `json:"full_name"`
 	CreatedAt    time.Time `json:"created_at"`
 	DesiredDate  string    `json:"desired_date"`

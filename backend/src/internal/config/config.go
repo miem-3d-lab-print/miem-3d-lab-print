@@ -13,6 +13,7 @@ import (
 
 type Config struct {
 	SMTP         SMTPConfig
+	SiteURL      string
 	Database     DatabaseConfig
 	JWT          JWTConfig
 	MinIO        MinIOConfig
@@ -122,6 +123,7 @@ func Load() (Config, error) {
 	return Config{
 		CORSOrigins: getenv("CORS_ALLOWED_ORIGINS", ""),
 		TrustProxy:  trustProxy,
+		SiteURL:     getenv("SITE_URL", "http://localhost:3000"),
 		SMTP: SMTPConfig{
 			Host:     getenv("SMTP_HOST", "localhost"),
 			Port:     getenv("SMTP_PORT", "1025"),

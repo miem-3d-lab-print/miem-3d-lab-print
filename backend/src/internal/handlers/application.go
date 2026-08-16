@@ -8,6 +8,7 @@ import (
 	"mime"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -23,8 +24,28 @@ type ApplicationHandler struct {
 	logger     *slog.Logger
 }
 
+const (
+	multipartMemoryLimit   = 8 << 20
+	createRequestSizeLimit = 210 << 20
+	fileRequestSizeLimit   = 22 << 20
+)
+
 func NewApplicationHandler(appService *services.ApplicationService, logger *slog.Logger) *ApplicationHandler {
 	return &ApplicationHandler{appService: appService, logger: logger}
+}
+
+func parseMultipart(w http.ResponseWriter, r *http.Request, limit int64) bool {
+	r.Body = http.MaxBytesReader(w, r.Body, limit)
+	if err := r.ParseMultipartForm(multipartMemoryLimit); err != nil {
+		var sizeError *http.MaxBytesError
+		if errors.As(err, &sizeError) {
+			apierr.Write(w, http.StatusRequestEntityTooLarge, "FILE_TOO_LARGE", "Общий размер загрузки превышен", nil)
+		} else {
+			apierr.Write(w, http.StatusBadRequest, "VALIDATION_ERROR", "Некорректный multipart запрос", nil)
+		}
+		return false
+	}
+	return true
 }
 
 func (h *ApplicationHandler) Register(
@@ -83,6 +104,7 @@ func (h *ApplicationHandler) List(w http.ResponseWriter, r *http.Request) {
 //	@Accept		mpfd
 //	@Produce	json
 //	@Security	BearerAuth
+//	@Param		title			formData	string	true	"Название заявки"
 //	@Param		position		formData	string	true	"Должность / группа заявителя"
 //	@Param		purpose			formData	string	true	"Цель печати"
 //	@Param		material_id		formData	string	true	"UUID материала"	format(uuid)
@@ -90,7 +112,8 @@ func (h *ApplicationHandler) List(w http.ResponseWriter, r *http.Request) {
 //	@Param		color_id		formData	string	false	"UUID цвета (обязателен если color_matters=true)"	format(uuid)
 //	@Param		desired_date	formData	string	true	"Желаемая дата получения (YYYY-MM-DD)"
 //	@Param		comment			formData	string	false	"Комментарий"
-//	@Param		files[]			formData	file	false	"Файлы моделей (STL / STEP / 3MF, до 20 МБ каждый)"
+//	@Param		file_url		formData	string	false	"HTTP(S)-ссылка на файл (альтернатива загрузке)"
+//	@Param		files[]			formData	file	false	"Файлы моделей (STL / STEP / 3MF / ZIP, до 20 МБ каждый; обязательны без file_url)"
 //	@Success	201	{object}	dto.CreateApplicationResponse
 //	@Failure	400	{object}	apierr.ErrorResponse
 //	@Failure	401	{object}	apierr.ErrorResponse
@@ -101,13 +124,14 @@ func (h *ApplicationHandler) List(w http.ResponseWriter, r *http.Request) {
 //	@Failure	500	{object}	apierr.ErrorResponse
 //	@Router		/api/applications [post]
 func (h *ApplicationHandler) Create(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseMultipartForm(100 << 20); err != nil {
-		apierr.Write(w, http.StatusBadRequest, "VALIDATION_ERROR", "Некорректный multipart запрос", nil)
+	if !parseMultipart(w, r, createRequestSizeLimit) {
 		return
 	}
+	defer r.MultipartForm.RemoveAll()
 
 	userID := middleware.UserIDFromCtx(r.Context())
 
+	title := strings.TrimSpace(r.FormValue("title"))
 	position := r.FormValue("position")
 	purpose := r.FormValue("purpose")
 	materialIDStr := r.FormValue("material_id")
@@ -115,8 +139,9 @@ func (h *ApplicationHandler) Create(w http.ResponseWriter, r *http.Request) {
 	colorIDStr := r.FormValue("color_id")
 	desiredDateStr := r.FormValue("desired_date")
 	commentStr := r.FormValue("comment")
+	fileURLStr := strings.TrimSpace(r.FormValue("file_url"))
 
-	if position == "" || purpose == "" || materialIDStr == "" || colorMattersStr == "" || desiredDateStr == "" {
+	if title == "" || position == "" || purpose == "" || materialIDStr == "" || colorMattersStr == "" || desiredDateStr == "" {
 		apierr.Write(w, http.StatusUnprocessableEntity, "VALIDATION_ERROR", "Заполните все обязательные поля", nil)
 		return
 	}
@@ -149,9 +174,14 @@ func (h *ApplicationHandler) Create(w http.ResponseWriter, r *http.Request) {
 		comment = &commentStr
 	}
 
+	var fileURL *string
+	if fileURLStr != "" {
+		fileURL = &fileURLStr
+	}
+
 	files := r.MultipartForm.File["files[]"]
 
-	resp, err := h.appService.Create(userID, position, purpose, materialID, colorMatters, colorID, desiredDate, comment, files)
+	resp, err := h.appService.Create(r.Context(), userID, title, position, purpose, materialID, colorMatters, colorID, desiredDate, comment, fileURL, files)
 	if err != nil {
 		h.handleAppError(w, err)
 		return
@@ -224,7 +254,7 @@ func (h *ApplicationHandler) Cancel(w http.ResponseWriter, r *http.Request) {
 //	@Produce	json
 //	@Security	BearerAuth
 //	@Param		id		path		string	true	"ID заявки"	format(uuid)
-//	@Param		file	formData	file	true	"Файл модели (STL / STEP / 3MF, до 20 МБ)"
+//	@Param		file	formData	file	true	"Файл модели (STL / STEP / 3MF / ZIP, до 20 МБ)"
 //	@Success	201	{object}	dto.UploadFileResponse
 //	@Failure	400	{object}	apierr.ErrorResponse	"Файл не передан или неверный формат"
 //	@Failure	401	{object}	apierr.ErrorResponse
@@ -242,18 +272,19 @@ func (h *ApplicationHandler) UploadFile(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if err := r.ParseMultipartForm(25 << 20); err != nil {
-		apierr.Write(w, http.StatusBadRequest, "VALIDATION_ERROR", "Некорректный multipart запрос", nil)
+	if !parseMultipart(w, r, fileRequestSizeLimit) {
 		return
 	}
+	defer r.MultipartForm.RemoveAll()
 
-	_, fh, err := r.FormFile("file")
-	if err != nil {
+	files := r.MultipartForm.File["file"]
+	if len(files) == 0 {
 		apierr.Write(w, http.StatusBadRequest, "FILES_REQUIRED", "Файл не передан", nil)
 		return
 	}
+	fh := files[0]
 
-	resp, err := h.appService.UploadFileToApp(appID, userID, fh)
+	resp, err := h.appService.UploadFileToApp(r.Context(), appID, userID, fh)
 	if err != nil {
 		h.handleAppError(w, err)
 		return
@@ -506,6 +537,8 @@ func (h *ApplicationHandler) handleAppError(w http.ResponseWriter, err error) {
 	var eFileNF *services.ErrFileNotFound
 	var eFileDeleted *services.ErrFileDeleted
 	var eFilesLimit *services.ErrFilesLimitReached
+	var eTitle *services.ErrInvalidApplicationTitle
+	var eFileURL *services.ErrInvalidFileURL
 
 	switch {
 	case errors.As(err, &eNotFound):
@@ -517,10 +550,14 @@ func (h *ApplicationHandler) handleAppError(w http.ResponseWriter, err error) {
 			"Отмена невозможна: заявка уже не в статусе «Новая». Свяжитесь с администратором.",
 			map[string]string{"current_status": eCancel.CurrentStatus})
 	case errors.As(err, &eFilesReq):
-		apierr.Write(w, http.StatusBadRequest, "FILES_REQUIRED", "Необходимо приложить хотя бы один файл", nil)
+		apierr.Write(w, http.StatusBadRequest, "FILES_REQUIRED", "Необходимо приложить хотя бы один файл или указать ссылку", nil)
+	case errors.As(err, &eTitle):
+		apierr.Write(w, http.StatusUnprocessableEntity, "INVALID_APPLICATION_TITLE", "Укажите название заявки длиной до 255 символов", nil)
+	case errors.As(err, &eFileURL):
+		apierr.Write(w, http.StatusUnprocessableEntity, "INVALID_FILE_URL", "Укажите корректную HTTP(S)-ссылку на файл", nil)
 	case errors.As(err, &eFormat):
 		apierr.Write(w, http.StatusBadRequest, "INVALID_FILE_FORMAT",
-			"Недопустимый формат файла (ожидается STL, STEP или 3MF)",
+			"Недопустимый формат файла (ожидается STL, STEP, 3MF или ZIP с моделями)",
 			map[string]string{"filename": eFormat.Filename})
 	case errors.As(err, &eTooLarge):
 		apierr.Write(w, http.StatusRequestEntityTooLarge, "FILE_TOO_LARGE",

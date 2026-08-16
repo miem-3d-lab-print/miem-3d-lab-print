@@ -76,6 +76,7 @@ services:
       SMTP_HOST: mailpit
       SMTP_PORT: "1025"
       SMTP_FROM: noreply@miem-3d-lab.local
+      SITE_URL: http://localhost:3000
     ports:
       - "127.0.0.1:8080:8080"
 

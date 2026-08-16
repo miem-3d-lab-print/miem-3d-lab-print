@@ -1,11 +1,14 @@
 package services
 
 import (
+	"archive/zip"
 	"context"
 	"fmt"
 	"io"
 	"log/slog"
 	"mime/multipart"
+	"net/url"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -21,6 +24,8 @@ const (
 	maxFileSize     = 20 * 1024 * 1024
 	maxFilesPerApp  = 10
 	maxActiveApps   = 10
+	maxArchiveFiles = 100
+	maxArchiveSize  = 200 * 1024 * 1024
 	cancelFileTTL   = 7 * 24 * time.Hour
 	rejectedFileTTL = 7 * 24 * time.Hour
 	issuedFileTTL   = 30 * 24 * time.Hour
@@ -36,7 +41,6 @@ var adminAllowedStatuses = map[string]bool{
 
 type ParsedFile struct {
 	Header *multipart.FileHeader
-	Data   []byte
 	Format string
 }
 
@@ -102,38 +106,117 @@ func detectFormat(filename string, data []byte) (string, bool) {
 			return "3MF", true
 		}
 		return "", false
+	case ".zip":
+		if len(data) >= 4 && data[0] == 0x50 && data[1] == 0x4B {
+			return "ZIP", true
+		}
+		return "", false
 	}
 	return "", false
+}
+
+func validateZIP(file multipart.File, size int64) bool {
+	archive, err := zip.NewReader(file, size)
+	if err != nil || len(archive.File) == 0 || len(archive.File) > maxArchiveFiles {
+		return false
+	}
+
+	var totalSize uint64
+	hasModel := false
+	for _, entry := range archive.File {
+		if entry.FileInfo().IsDir() {
+			continue
+		}
+		cleanName := path.Clean(strings.ReplaceAll(entry.Name, "\\", "/"))
+		if path.IsAbs(cleanName) || cleanName == ".." || strings.HasPrefix(cleanName, "../") {
+			return false
+		}
+		if entry.UncompressedSize64 > maxArchiveSize || totalSize > uint64(maxArchiveSize)-entry.UncompressedSize64 {
+			return false
+		}
+		totalSize += entry.UncompressedSize64
+		switch strings.ToLower(filepath.Ext(cleanName)) {
+		case ".stl", ".step", ".stp", ".3mf":
+			reader, err := entry.Open()
+			if err != nil {
+				return false
+			}
+			headerSize := uint64(84)
+			if entry.UncompressedSize64 < headerSize {
+				headerSize = entry.UncompressedSize64
+			}
+			header := make([]byte, headerSize)
+			_, readErr := io.ReadFull(reader, header)
+			closeErr := reader.Close()
+			if readErr != nil || closeErr != nil {
+				return false
+			}
+			if _, ok := detectFormat(cleanName, header); !ok {
+				return false
+			}
+			hasModel = true
+		}
+	}
+	return hasModel
+}
+
+func validateFile(fh *multipart.FileHeader) (string, error) {
+	if fh.Size <= 0 {
+		return "", &ErrInvalidFileFormat{Filename: fh.Filename}
+	}
+	if fh.Size > maxFileSize {
+		return "", &ErrFileTooLarge{Filename: fh.Filename}
+	}
+
+	file, err := fh.Open()
+	if err != nil {
+		return "", fmt.Errorf("open file: %w", err)
+	}
+	defer file.Close()
+
+	headerSize := int64(84)
+	if fh.Size < headerSize {
+		headerSize = fh.Size
+	}
+	header := make([]byte, headerSize)
+	if _, err := io.ReadFull(file, header); err != nil {
+		return "", fmt.Errorf("read file header: %w", err)
+	}
+	format, ok := detectFormat(fh.Filename, header)
+	if !ok {
+		return "", &ErrInvalidFileFormat{Filename: fh.Filename}
+	}
+	if format == "ZIP" && !validateZIP(file, fh.Size) {
+		return "", &ErrInvalidFileFormat{Filename: fh.Filename}
+	}
+	return format, nil
 }
 
 func (s *ApplicationService) validateFiles(files []*multipart.FileHeader) ([]ParsedFile, error) {
 	if len(files) == 0 {
 		return nil, &ErrFilesRequired{}
 	}
+	if len(files) > maxFilesPerApp {
+		return nil, &ErrFilesLimitReached{}
+	}
 	parsed := make([]ParsedFile, 0, len(files))
 	for _, fh := range files {
-		if fh.Size > maxFileSize {
-			return nil, &ErrFileTooLarge{Filename: fh.Filename}
-		}
-		f, err := fh.Open()
+		format, err := validateFile(fh)
 		if err != nil {
-			return nil, fmt.Errorf("open file: %w", err)
+			return nil, err
 		}
-		data, err := io.ReadAll(f)
-		f.Close()
-		if err != nil {
-			return nil, fmt.Errorf("read file: %w", err)
-		}
-		if len(data) > maxFileSize {
-			return nil, &ErrFileTooLarge{Filename: fh.Filename}
-		}
-		format, ok := detectFormat(fh.Filename, data)
-		if !ok {
-			return nil, &ErrInvalidFileFormat{Filename: fh.Filename}
-		}
-		parsed = append(parsed, ParsedFile{Header: fh, Data: data, Format: format})
+		parsed = append(parsed, ParsedFile{Header: fh, Format: format})
 	}
 	return parsed, nil
+}
+
+func (s *ApplicationService) uploadFile(ctx context.Context, storagePath string, file *multipart.FileHeader) error {
+	reader, err := file.Open()
+	if err != nil {
+		return fmt.Errorf("open file for upload: %w", err)
+	}
+	defer reader.Close()
+	return s.storageService.Upload(ctx, storagePath, reader, file.Size, "application/octet-stream")
 }
 
 func (s *ApplicationService) ListByUser(userID uuid.UUID, status string, page, perPage int) (*dto.ApplicationListResponse, error) {
@@ -156,6 +239,7 @@ func (s *ApplicationService) ListByUser(userID uuid.UUID, status string, page, p
 		items = append(items, &dto.ApplicationListItem{
 			ID:           a.ID.String(),
 			Number:       a.Number,
+			Title:        a.Title,
 			Status:       a.Status,
 			MaterialName: a.SnapshotMaterialName,
 			ColorName:    a.SnapshotColorName,
@@ -176,15 +260,31 @@ func (s *ApplicationService) ListByUser(userID uuid.UUID, status string, page, p
 }
 
 func (s *ApplicationService) Create(
+	ctx context.Context,
 	userID uuid.UUID,
+	title string,
 	position, purpose string,
 	materialID uuid.UUID,
 	colorMatters bool,
 	colorID *uuid.UUID,
 	desiredDate time.Time,
 	comment *string,
+	fileURL *string,
 	files []*multipart.FileHeader,
 ) (*dto.CreateApplicationResponse, error) {
+	title = strings.TrimSpace(title)
+	if title == "" || len([]rune(title)) > 255 || strings.ContainsAny(title, "\r\n") {
+		return nil, &ErrInvalidApplicationTitle{}
+	}
+
+	if fileURL != nil {
+		trimmed := strings.TrimSpace(*fileURL)
+		parsedURL, err := url.ParseRequestURI(trimmed)
+		if err != nil || len(trimmed) > 2048 || parsedURL.Host == "" || (parsedURL.Scheme != "http" && parsedURL.Scheme != "https") {
+			return nil, &ErrInvalidFileURL{}
+		}
+		fileURL = &trimmed
+	}
 	user, err := s.userRepo.FindByID(userID)
 	if err != nil || user == nil {
 		return nil, &ErrProfileNotFound{}
@@ -210,9 +310,14 @@ func (s *ApplicationService) Create(
 		return nil, err
 	}
 
-	parsedFiles, err := s.validateFiles(files)
-	if err != nil {
-		return nil, err
+	var parsedFiles []ParsedFile
+	if len(files) > 0 {
+		parsedFiles, err = s.validateFiles(files)
+		if err != nil {
+			return nil, err
+		}
+	} else if fileURL == nil {
+		return nil, &ErrFilesRequired{}
 	}
 
 	year := time.Now().Year()
@@ -223,6 +328,7 @@ func (s *ApplicationService) Create(
 
 	appModel := &models.Application{
 		Number:               number,
+		Title:                title,
 		UserID:               userID,
 		SnapshotFullName:     *user.FullName,
 		SnapshotEmail:        user.Email,
@@ -234,6 +340,7 @@ func (s *ApplicationService) Create(
 		SnapshotColorName:    colorName,
 		DesiredDate:          desiredDate,
 		Comment:              comment,
+		FileURL:              fileURL,
 	}
 	if colorMatters && colorID != nil {
 		appModel.ColorID = colorID
@@ -250,7 +357,7 @@ func (s *ApplicationService) Create(
 	}
 
 	var app *models.Application
-	txErr := s.txMgr.RunInTx(context.Background(), func(tx repository.DBTX) error {
+	txErr := s.txMgr.RunInTx(ctx, func(tx repository.DBTX) error {
 		activeCount, err := s.appRepo.CountActive(tx, userID)
 		if err != nil {
 			return fmt.Errorf("count active: %w", err)
@@ -278,7 +385,7 @@ func (s *ApplicationService) Create(
 			ext := strings.ToLower(filepath.Ext(pf.Header.Filename))
 			storagePath := fmt.Sprintf("applications/%s/%s%s", app.ID, fileID, ext)
 
-			if err := s.storageService.Upload(context.Background(), storagePath, pf.Data, "application/octet-stream"); err != nil {
+			if err := s.uploadFile(ctx, storagePath, pf.Header); err != nil {
 				cleanupUploads()
 				s.logger.Error("minio upload failed", "err", err)
 				return &ErrStorageError{}
@@ -289,7 +396,7 @@ func (s *ApplicationService) Create(
 				ApplicationID: app.ID,
 				Filename:      pf.Header.Filename,
 				StoragePath:   storagePath,
-				Size:          len(pf.Data),
+				Size:          int(pf.Header.Size),
 				Format:        pf.Format,
 			}); err != nil {
 				cleanupUploads()
@@ -305,7 +412,7 @@ func (s *ApplicationService) Create(
 		return nil, txErr
 	}
 
-	if err := s.emailService.SendApplicationCreated(user.Email, number); err != nil {
+	if err := s.emailService.SendApplicationCreated(user.Email, number, title, app.ID.String()); err != nil {
 		s.logger.Error("send application created email", "err", err, "number", number)
 	}
 
@@ -317,6 +424,8 @@ func (s *ApplicationService) Create(
 			if err := s.emailService.SendNewApplicationToAdmin(
 				recipient.Email,
 				number,
+				title,
+				app.ID.String(),
 				*user.FullName,
 				user.Email,
 				matName,
@@ -336,6 +445,7 @@ func (s *ApplicationService) Create(
 	return &dto.CreateApplicationResponse{
 		ID:        app.ID.String(),
 		Number:    app.Number,
+		Title:     app.Title,
 		Status:    app.Status,
 		CreatedAt: app.CreatedAt,
 	}, nil
@@ -402,6 +512,7 @@ func (s *ApplicationService) buildUserDetail(app *models.Application) (*dto.Appl
 	detail := &dto.ApplicationDetailUser{
 		ID:               app.ID.String(),
 		Number:           app.Number,
+		Title:            app.Title,
 		Status:           app.Status,
 		RejectionReason:  app.RejectionReason,
 		Position:         app.Position,
@@ -410,6 +521,7 @@ func (s *ApplicationService) buildUserDetail(app *models.Application) (*dto.Appl
 		ColorMatters:     app.ColorMatters,
 		DesiredDate:      app.DesiredDate.Format("2006-01-02"),
 		Comment:          app.Comment,
+		FileURL:          app.FileURL,
 		Files:            fileItems,
 		FilesDeleteAfter: app.FilesDeleteAfter,
 		StatusHistory:    histItems,
@@ -474,6 +586,7 @@ func (s *ApplicationService) AdminList(filter dto.ApplicationFilter) (*dto.Admin
 		items = append(items, &dto.AdminApplicationListItem{
 			ID:           a.ID.String(),
 			Number:       a.Number,
+			Title:        a.Title,
 			FullName:     a.SnapshotFullName,
 			CreatedAt:    a.CreatedAt,
 			DesiredDate:  a.DesiredDate.Format("2006-01-02"),
@@ -567,6 +680,7 @@ func (s *ApplicationService) AdminGetByID(id uuid.UUID) (*dto.ApplicationDetailA
 	detail := &dto.ApplicationDetailAdmin{
 		ID:     app.ID.String(),
 		Number: app.Number,
+		Title:  app.Title,
 		Applicant: dto.AdminApplicant{
 			UserID:           user.ID.String(),
 			SnapshotFullName: app.SnapshotFullName,
@@ -584,6 +698,7 @@ func (s *ApplicationService) AdminGetByID(id uuid.UUID) (*dto.ApplicationDetailA
 		ColorMatters:    app.ColorMatters,
 		DesiredDate:     app.DesiredDate.Format("2006-01-02"),
 		Comment:         app.Comment,
+		FileURL:         app.FileURL,
 		Status:          app.Status,
 		RejectionReason: app.RejectionReason,
 		Files:           fileItems,
@@ -667,7 +782,7 @@ func (s *ApplicationService) AdminChangeStatus(id, adminID uuid.UUID, targetStat
 	if rejectionReason != nil {
 		reason = *rejectionReason
 	}
-	if err := s.emailService.SendStatusChanged(app.SnapshotEmail, app.Number, targetStatus, reason); err != nil {
+	if err := s.emailService.SendStatusChanged(app.SnapshotEmail, app.Number, app.Title, app.ID.String(), targetStatus, reason); err != nil {
 		s.logger.Error("send status changed email", "err", err)
 	}
 
@@ -678,7 +793,7 @@ func (s *ApplicationService) AdminChangeStatus(id, adminID uuid.UUID, targetStat
 	}, nil
 }
 
-func (s *ApplicationService) UploadFileToApp(appID, userID uuid.UUID, fh *multipart.FileHeader) (*dto.UploadFileResponse, error) {
+func (s *ApplicationService) UploadFileToApp(ctx context.Context, appID, userID uuid.UUID, fh *multipart.FileHeader) (*dto.UploadFileResponse, error) {
 	app, err := s.appRepo.FindByIDAndUser(appID, userID)
 	if err != nil {
 		return nil, fmt.Errorf("find application: %w", err)
@@ -698,42 +813,27 @@ func (s *ApplicationService) UploadFileToApp(appID, userID uuid.UUID, fh *multip
 		return nil, &ErrFilesLimitReached{}
 	}
 
-	if fh.Size > maxFileSize {
-		return nil, &ErrFileTooLarge{Filename: fh.Filename}
-	}
-	f, err := fh.Open()
+	format, err := validateFile(fh)
 	if err != nil {
-		return nil, fmt.Errorf("open file: %w", err)
-	}
-	data, err := io.ReadAll(f)
-	f.Close()
-	if err != nil {
-		return nil, fmt.Errorf("read file: %w", err)
-	}
-	if len(data) > maxFileSize {
-		return nil, &ErrFileTooLarge{Filename: fh.Filename}
-	}
-	format, ok := detectFormat(fh.Filename, data)
-	if !ok {
-		return nil, &ErrInvalidFileFormat{Filename: fh.Filename}
+		return nil, err
 	}
 
 	fileID := uuid.New()
 	ext := strings.ToLower(filepath.Ext(fh.Filename))
 	storagePath := fmt.Sprintf("applications/%s/%s%s", appID, fileID, ext)
 
-	if err := s.storageService.Upload(context.Background(), storagePath, data, "application/octet-stream"); err != nil {
+	if err := s.uploadFile(ctx, storagePath, fh); err != nil {
 		return nil, &ErrStorageError{}
 	}
 
 	var created *models.File
-	if err := s.txMgr.RunInTx(context.Background(), func(tx repository.DBTX) error {
+	if err := s.txMgr.RunInTx(ctx, func(tx repository.DBTX) error {
 		var err error
 		created, err = s.fileRepo.Create(tx, &models.File{
 			ApplicationID: appID,
 			Filename:      fh.Filename,
 			StoragePath:   storagePath,
-			Size:          len(data),
+			Size:          int(fh.Size),
 			Format:        format,
 		})
 		return err

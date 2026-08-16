@@ -9,6 +9,7 @@ import (
 type Application struct {
 	ID                   uuid.UUID
 	Number               string
+	Title                string
 	UserID               uuid.UUID
 	SnapshotFullName     string
 	SnapshotEmail        string
@@ -21,6 +22,7 @@ type Application struct {
 	SnapshotColorName    *string
 	DesiredDate          time.Time
 	Comment              *string
+	FileURL              *string
 	Status               string
 	RejectionReason      *string
 	FilesDeleteAfter     *time.Time

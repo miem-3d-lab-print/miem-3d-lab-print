@@ -15,6 +15,48 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/admin/admins": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-users"
+                ],
+                "summary": "Список администраторов",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.AdminUsersResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/admin/applications": {
             "get": {
                 "security": [
@@ -106,25 +148,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.AdminApplicationListResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.AdminApplicationListResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -158,31 +200,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.ApplicationDetailAdmin"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ApplicationDetailAdmin"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -218,37 +260,40 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "302": {
-                        "description": "Found"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "410": {
                         "description": "Файл удалён",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -286,7 +331,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.ChangeStatusRequest"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ChangeStatusRequest"
                         }
                     }
                 ],
@@ -294,43 +339,43 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.ChangeStatusResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ChangeStatusResponse"
                         }
                     },
                     "400": {
                         "description": "Невалидный статус / отсутствует обязательное поле",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Заявка в финальном статусе",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -358,7 +403,7 @@ const docTemplate = `{
                             "additionalProperties": {
                                 "type": "array",
                                 "items": {
-                                    "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.MaterialResponse"
+                                    "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.MaterialResponse"
                                 }
                             }
                         }
@@ -366,19 +411,19 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -406,7 +451,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.CreateMaterialRequest"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.CreateMaterialRequest"
                         }
                     }
                 ],
@@ -414,37 +459,37 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.MaterialResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.MaterialResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Материал с таким названием уже существует",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -482,7 +527,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.PatchMaterialRequest"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.PatchMaterialRequest"
                         }
                     }
                 ],
@@ -490,43 +535,43 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.MaterialResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.MaterialResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Название уже занято",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -564,7 +609,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.CreateColorRequest"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.CreateColorRequest"
                         }
                     }
                 ],
@@ -572,43 +617,43 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.ColorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ColorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Цвет с таким названием уже существует",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -654,7 +699,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.PatchColorRequest"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.PatchColorRequest"
                         }
                     }
                 ],
@@ -662,43 +707,43 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.ColorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ColorResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Название уже занято",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -736,31 +781,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.StatsResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.StatsResponse"
                         }
                     },
                     "400": {
                         "description": "Некорректный период",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -794,31 +839,113 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.AdminUsersResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.AdminUsersResponse"
                         }
                     },
                     "400": {
                         "description": "Запрос слишком короткий",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/admin/users/{id}/application-notifications": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-users"
+                ],
+                "summary": "Настроить уведомления администратора о новых заявках",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "ID администратора",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Состояние уведомлений",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.SetApplicationNotificationsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.SetApplicationNotificationsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Пользователь не является администратором",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -856,7 +983,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.SetRoleRequest"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.SetRoleRequest"
                         }
                     }
                 ],
@@ -864,43 +991,43 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.SetRoleResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.SetRoleResponse"
                         }
                     },
                     "400": {
                         "description": "Недопустимое значение роли",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Нельзя снять роль с последнего администратора",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -956,25 +1083,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.ApplicationListResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ApplicationListResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Требуется согласие",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -996,6 +1123,13 @@ const docTemplate = `{
                 ],
                 "summary": "Создать заявку",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Название заявки",
+                        "name": "title",
+                        "in": "formData",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "Должность / группа заявителя",
@@ -1046,8 +1180,14 @@ const docTemplate = `{
                         "in": "formData"
                     },
                     {
+                        "type": "string",
+                        "description": "HTTP(S)-ссылка на файл (альтернатива загрузке)",
+                        "name": "file_url",
+                        "in": "formData"
+                    },
+                    {
                         "type": "file",
-                        "description": "Файлы моделей (STL / STEP / 3MF, до 20 МБ каждый)",
+                        "description": "Файлы моделей (STL / STEP / 3MF / ZIP, до 20 МБ каждый; обязательны без file_url)",
                         "name": "files[]",
                         "in": "formData"
                     }
@@ -1056,49 +1196,49 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.CreateApplicationResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.CreateApplicationResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Требуется согласие",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Профиль не заполнен / лимит заявок / материал недоступен",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "413": {
                         "description": "Файл слишком большой",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "422": {
                         "description": "Ошибка валидации",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -1132,31 +1272,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.ApplicationDetailUser"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ApplicationDetailUser"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Требуется согласие",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -1190,37 +1330,37 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.CancelApplicationResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.CancelApplicationResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Требуется согласие",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Отмена невозможна",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -1254,7 +1394,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "file",
-                        "description": "Файл модели (STL / STEP / 3MF, до 20 МБ)",
+                        "description": "Файл модели (STL / STEP / 3MF / ZIP, до 20 МБ)",
                         "name": "file",
                         "in": "formData",
                         "required": true
@@ -1264,49 +1404,49 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.UploadFileResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.UploadFileResponse"
                         }
                     },
                     "400": {
                         "description": "Файл не передан или неверный формат",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Требуется согласие",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Заявка не в статусе new",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "413": {
                         "description": "Файл слишком большой",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -1322,7 +1462,7 @@ const docTemplate = `{
                 "tags": [
                     "applications"
                 ],
-                "summary": "Скачать файл (редирект на presigned URL)",
+                "summary": "Скачать файл",
                 "parameters": [
                     {
                         "type": "string",
@@ -1342,37 +1482,40 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "302": {
-                        "description": "Found"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Требуется согласие",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "410": {
                         "description": "Файл удалён",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -1394,7 +1537,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.LogoutRequest"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.LogoutRequest"
                         }
                     }
                 ],
@@ -1405,13 +1548,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -1436,7 +1579,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.RefreshRequest"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.RefreshRequest"
                         }
                     }
                 ],
@@ -1444,19 +1587,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.RefreshResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.RefreshResponse"
                         }
                     },
                     "401": {
                         "description": "Невалидный/просроченный/отозванный token",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -1481,7 +1624,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.RequestOTPRequest"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.RequestOTPRequest"
                         }
                     }
                 ],
@@ -1489,25 +1632,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.RequestOTPResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.RequestOTPResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "429": {
                         "description": "Превышен лимит запросов",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -1532,7 +1675,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.VerifyOTPRequest"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.VerifyOTPRequest"
                         }
                     }
                 ],
@@ -1540,31 +1683,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.VerifyOTPResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.VerifyOTPResponse"
                         }
                     },
                     "400": {
                         "description": "Неверный или истёкший код",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "OTP не найден",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "423": {
                         "description": "Слишком много попыток",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -1592,7 +1735,7 @@ const docTemplate = `{
                             "additionalProperties": {
                                 "type": "array",
                                 "items": {
-                                    "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.MaterialResponse"
+                                    "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.MaterialResponse"
                                 }
                             }
                         }
@@ -1600,19 +1743,19 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Требуется согласие",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -1636,25 +1779,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.ProfileResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ProfileResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Профиль не найден",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -1682,7 +1825,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.PatchProfileRequest"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.PatchProfileRequest"
                         }
                     }
                 ],
@@ -1690,37 +1833,37 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.ProfileResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ProfileResponse"
                         }
                     },
                     "400": {
                         "description": "Ошибка валидации",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Требуется согласие",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -1744,19 +1887,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.ConsentResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ConsentResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse"
+                            "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse"
                         }
                     }
                 }
@@ -1764,7 +1907,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "miem_3d_lab_print_backend_src_internal_apierr.APIError": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.APIError": {
             "type": "object",
             "properties": {
                 "code": {
@@ -1780,15 +1923,15 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_apierr.ErrorResponse": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {
-                    "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_apierr.APIError"
+                    "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.APIError"
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.AdminApplicant": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.AdminApplicant": {
             "type": "object",
             "properties": {
                 "max": {
@@ -1808,7 +1951,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.AdminApplicationListItem": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.AdminApplicationListItem": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -1832,28 +1975,34 @@ const docTemplate = `{
                 "number": {
                     "type": "string"
                 },
+                "title": {
+                    "type": "string"
+                },
                 "status": {
                     "type": "string"
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.AdminApplicationListResponse": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.AdminApplicationListResponse": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.AdminApplicationListItem"
+                        "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.AdminApplicationListItem"
                     }
                 },
                 "meta": {
-                    "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.PaginationMeta"
+                    "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.PaginationMeta"
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.AdminUserItem": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.AdminUserItem": {
             "type": "object",
             "properties": {
+                "application_notifications": {
+                    "type": "boolean"
+                },
                 "created_at": {
                     "type": "string"
                 },
@@ -1871,25 +2020,25 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.AdminUsersResponse": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.AdminUsersResponse": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.AdminUserItem"
+                        "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.AdminUserItem"
                     }
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.ApplicationDetailAdmin": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ApplicationDetailAdmin": {
             "type": "object",
             "properties": {
                 "applicant": {
-                    "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.AdminApplicant"
+                    "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.AdminApplicant"
                 },
                 "color": {
-                    "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.ColorRef"
+                    "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ColorRef"
                 },
                 "color_matters": {
                     "type": "boolean"
@@ -1903,19 +2052,25 @@ const docTemplate = `{
                 "desired_date": {
                     "type": "string"
                 },
+                "file_url": {
+                    "type": "string"
+                },
                 "files": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.FileItem"
+                        "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.FileItem"
                     }
                 },
                 "id": {
                     "type": "string"
                 },
                 "material": {
-                    "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.MaterialRefAdmin"
+                    "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.MaterialRefAdmin"
                 },
                 "number": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 },
                 "position": {
@@ -1933,16 +2088,16 @@ const docTemplate = `{
                 "status_history": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.StatusHistoryItemAdmin"
+                        "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.StatusHistoryItemAdmin"
                     }
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.ApplicationDetailUser": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ApplicationDetailUser": {
             "type": "object",
             "properties": {
                 "color": {
-                    "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.ColorRef"
+                    "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ColorRef"
                 },
                 "color_matters": {
                     "type": "boolean"
@@ -1959,19 +2114,25 @@ const docTemplate = `{
                 "files": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.FileItem"
+                        "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.FileItem"
                     }
                 },
                 "files_delete_after": {
                     "type": "string"
                 },
+                "file_url": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
                 "material": {
-                    "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.MaterialRef"
+                    "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.MaterialRef"
                 },
                 "number": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 },
                 "position": {
@@ -1989,12 +2150,12 @@ const docTemplate = `{
                 "status_history": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.StatusHistoryItemUser"
+                        "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.StatusHistoryItemUser"
                     }
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.ApplicationListItem": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ApplicationListItem": {
             "type": "object",
             "properties": {
                 "color_name": {
@@ -2018,26 +2179,29 @@ const docTemplate = `{
                 "number": {
                     "type": "string"
                 },
+                "title": {
+                    "type": "string"
+                },
                 "status": {
                     "type": "string"
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.ApplicationListResponse": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ApplicationListResponse": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.ApplicationListItem"
+                        "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ApplicationListItem"
                     }
                 },
                 "meta": {
-                    "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.PaginationMeta"
+                    "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.PaginationMeta"
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.ByMaterialStat": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ByMaterialStat": {
             "type": "object",
             "properties": {
                 "count": {
@@ -2048,7 +2212,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.CancelApplicationResponse": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.CancelApplicationResponse": {
             "type": "object",
             "properties": {
                 "files_delete_after": {
@@ -2062,7 +2226,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.ChangeStatusRequest": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ChangeStatusRequest": {
             "type": "object",
             "properties": {
                 "comment": {
@@ -2076,7 +2240,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.ChangeStatusResponse": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ChangeStatusResponse": {
             "type": "object",
             "properties": {
                 "files_delete_after": {
@@ -2090,7 +2254,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.ColorRef": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ColorRef": {
             "type": "object",
             "properties": {
                 "id": {
@@ -2101,7 +2265,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.ColorResponse": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ColorResponse": {
             "type": "object",
             "properties": {
                 "id": {
@@ -2115,7 +2279,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.ConsentResponse": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ConsentResponse": {
             "type": "object",
             "properties": {
                 "consent_date": {
@@ -2126,7 +2290,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.CreateApplicationResponse": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.CreateApplicationResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -2138,12 +2302,15 @@ const docTemplate = `{
                 "number": {
                     "type": "string"
                 },
+                "title": {
+                    "type": "string"
+                },
                 "status": {
                     "type": "string"
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.CreateColorRequest": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.CreateColorRequest": {
             "type": "object",
             "properties": {
                 "is_active": {
@@ -2154,7 +2321,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.CreateMaterialRequest": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.CreateMaterialRequest": {
             "type": "object",
             "properties": {
                 "description": {
@@ -2168,7 +2335,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.FileItem": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.FileItem": {
             "type": "object",
             "properties": {
                 "filename": {
@@ -2185,7 +2352,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.LogoutRequest": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.LogoutRequest": {
             "type": "object",
             "required": [
                 "refresh_token"
@@ -2196,7 +2363,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.MaterialRef": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.MaterialRef": {
             "type": "object",
             "properties": {
                 "id": {
@@ -2207,7 +2374,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.MaterialRefAdmin": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.MaterialRefAdmin": {
             "type": "object",
             "properties": {
                 "id": {
@@ -2221,13 +2388,13 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.MaterialResponse": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.MaterialResponse": {
             "type": "object",
             "properties": {
                 "colors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.ColorResponse"
+                        "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ColorResponse"
                     }
                 },
                 "description": {
@@ -2244,7 +2411,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.PaginationMeta": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.PaginationMeta": {
             "type": "object",
             "properties": {
                 "page": {
@@ -2261,7 +2428,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.PatchColorRequest": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.PatchColorRequest": {
             "type": "object",
             "properties": {
                 "is_active": {
@@ -2272,7 +2439,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.PatchMaterialRequest": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.PatchMaterialRequest": {
             "type": "object",
             "properties": {
                 "description": {
@@ -2286,7 +2453,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.PatchProfileRequest": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.PatchProfileRequest": {
             "type": "object",
             "properties": {
                 "full_name": {
@@ -2300,7 +2467,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.ProfileResponse": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ProfileResponse": {
             "type": "object",
             "properties": {
                 "consent_date": {
@@ -2332,7 +2499,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.RefreshRequest": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.RefreshRequest": {
             "type": "object",
             "required": [
                 "refresh_token"
@@ -2343,7 +2510,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.RefreshResponse": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.RefreshResponse": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -2357,7 +2524,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.RequestOTPRequest": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.RequestOTPRequest": {
             "type": "object",
             "required": [
                 "email"
@@ -2368,7 +2535,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.RequestOTPResponse": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.RequestOTPResponse": {
             "type": "object",
             "properties": {
                 "expires_in": {
@@ -2379,7 +2546,29 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.SetRoleRequest": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.SetApplicationNotificationsRequest": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.SetApplicationNotificationsResponse": {
+            "type": "object",
+            "properties": {
+                "application_notifications": {
+                    "type": "boolean"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.SetRoleRequest": {
             "type": "object",
             "properties": {
                 "role": {
@@ -2387,7 +2576,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.SetRoleResponse": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.SetRoleResponse": {
             "type": "object",
             "properties": {
                 "email": {
@@ -2401,7 +2590,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.StatsResponse": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.StatsResponse": {
             "type": "object",
             "properties": {
                 "avg_completion_hours": {
@@ -2410,7 +2599,7 @@ const docTemplate = `{
                 "by_material": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.ByMaterialStat"
+                        "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.ByMaterialStat"
                     }
                 },
                 "by_status_current": {
@@ -2438,7 +2627,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.StatusHistoryChangedBy": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.StatusHistoryChangedBy": {
             "type": "object",
             "properties": {
                 "full_name": {
@@ -2452,11 +2641,11 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.StatusHistoryItemAdmin": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.StatusHistoryItemAdmin": {
             "type": "object",
             "properties": {
                 "changed_by": {
-                    "$ref": "#/definitions/miem_3d_lab_print_backend_src_internal_dto.StatusHistoryChangedBy"
+                    "$ref": "#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.StatusHistoryChangedBy"
                 },
                 "comment": {
                     "type": "string"
@@ -2469,7 +2658,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.StatusHistoryItemUser": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.StatusHistoryItemUser": {
             "type": "object",
             "properties": {
                 "changed_by_role": {
@@ -2486,7 +2675,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.UploadFileResponse": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.UploadFileResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -2506,7 +2695,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.VerifyOTPRequest": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.VerifyOTPRequest": {
             "type": "object",
             "required": [
                 "code",
@@ -2521,7 +2710,7 @@ const docTemplate = `{
                 }
             }
         },
-        "miem_3d_lab_print_backend_src_internal_dto.VerifyOTPResponse": {
+        "github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.VerifyOTPResponse": {
             "type": "object",
             "properties": {
                 "access_token": {

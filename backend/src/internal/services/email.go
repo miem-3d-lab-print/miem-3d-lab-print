@@ -4,16 +4,25 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/smtp"
+	"strings"
 
 	"github.com/miem-3d-lab-print/miem-3d-lab-print/backend/src/internal/config"
 )
 
 type EmailService struct {
-	cfg config.SMTPConfig
+	cfg     config.SMTPConfig
+	siteURL string
 }
 
-func NewEmailService(cfg config.SMTPConfig) *EmailService {
-	return &EmailService{cfg: cfg}
+func NewEmailService(cfg config.SMTPConfig, siteURL string) *EmailService {
+	return &EmailService{cfg: cfg, siteURL: strings.TrimRight(siteURL, "/")}
+}
+
+func (s *EmailService) applicationURL(applicationID string, admin bool) string {
+	if admin {
+		return fmt.Sprintf("%s/admin/applications/%s", s.siteURL, applicationID)
+	}
+	return fmt.Sprintf("%s/app/applications/%s", s.siteURL, applicationID)
 }
 
 func (s *EmailService) send(to, subject, body string) error {
@@ -40,43 +49,44 @@ func (s *EmailService) SendOTP(to, code string) error {
 	return s.send(to, subject, body)
 }
 
-func (s *EmailService) SendApplicationCreated(to, number string) error {
-	subject := fmt.Sprintf("Заявка принята, №%s", number)
-	body := fmt.Sprintf("Ваша заявка №%s принята в обработку.\n\nМы уведомим вас об изменении статуса.", number)
+func (s *EmailService) SendApplicationCreated(to, number, title, applicationID string) error {
+	subject := fmt.Sprintf("Заявка «%s» принята, №%s", title, number)
+	body := fmt.Sprintf("Ваша заявка «%s», №%s принята в обработку.\n\nОткрыть заявку: %s\n\nМы уведомим вас об изменении статуса.", title, number, s.applicationURL(applicationID, false))
 	return s.send(to, subject, body)
 }
 
 func (s *EmailService) SendNewApplicationToAdmin(
-	to, number, applicantName, applicantEmail, materialName, desiredDate, purpose string,
+	to, number, title, applicationID, applicantName, applicantEmail, materialName, desiredDate, purpose string,
 ) error {
-	subject := fmt.Sprintf("Новая заявка №%s", number)
+	subject := fmt.Sprintf("Новая заявка «%s», №%s", title, number)
 	body := fmt.Sprintf(
-		"Поступила новая заявка №%s.\n\nЗаявитель: %s\nEmail: %s\nМатериал: %s\nЖелаемая дата: %s\nЦель: %s",
-		number, applicantName, applicantEmail, materialName, desiredDate, purpose,
+		"Поступила новая заявка «%s», №%s.\n\nОткрыть заявку: %s\n\nЗаявитель: %s\nEmail: %s\nМатериал: %s\nЖелаемая дата: %s\nЦель: %s",
+		title, number, s.applicationURL(applicationID, true), applicantName, applicantEmail, materialName, desiredDate, purpose,
 	)
 	return s.send(to, subject, body)
 }
 
-func (s *EmailService) SendStatusChanged(to, number, status, rejectionReason string) error {
+func (s *EmailService) SendStatusChanged(to, number, title, applicationID, status, rejectionReason string) error {
 	var subject, body string
 	switch status {
 	case "in_review":
-		subject = fmt.Sprintf("Заявка №%s на рассмотрении", number)
-		body = fmt.Sprintf("Ваша заявка №%s принята на рассмотрение.", number)
+		subject = fmt.Sprintf("Заявка «%s», №%s на рассмотрении", title, number)
+		body = fmt.Sprintf("Ваша заявка «%s», №%s принята на рассмотрение.", title, number)
 	case "printing":
-		subject = fmt.Sprintf("Заявка №%s в печати", number)
-		body = fmt.Sprintf("Ваша заявка №%s передана в печать.", number)
+		subject = fmt.Sprintf("Заявка «%s», №%s в печати", title, number)
+		body = fmt.Sprintf("Ваша заявка «%s», №%s передана в печать.", title, number)
 	case "ready":
-		subject = fmt.Sprintf("Заявка №%s готова к выдаче", number)
-		body = fmt.Sprintf("Ваша заявка №%s готова. Заберите её в ауд. 211.", number)
+		subject = fmt.Sprintf("Заявка «%s», №%s готова к выдаче", title, number)
+		body = fmt.Sprintf("Ваша заявка «%s», №%s готова. Заберите её в ауд. 211.", title, number)
 	case "issued":
-		subject = fmt.Sprintf("Заявка №%s выдана", number)
-		body = fmt.Sprintf("Ваша заявка №%s выдана. Спасибо!", number)
+		subject = fmt.Sprintf("Заявка «%s», №%s выдана", title, number)
+		body = fmt.Sprintf("Ваша заявка «%s», №%s выдана. Спасибо!", title, number)
 	case "rejected":
-		subject = fmt.Sprintf("Заявка №%s отклонена", number)
-		body = fmt.Sprintf("Ваша заявка №%s отклонена.\n\nПричина: %s", number, rejectionReason)
+		subject = fmt.Sprintf("Заявка «%s», №%s отклонена", title, number)
+		body = fmt.Sprintf("Ваша заявка «%s», №%s отклонена.\n\nПричина: %s", title, number, rejectionReason)
 	default:
 		return nil
 	}
+	body += fmt.Sprintf("\n\nОткрыть заявку: %s", s.applicationURL(applicationID, false))
 	return s.send(to, subject, body)
 }

@@ -2,7 +2,7 @@
 
 Веб-сервис лаборатории 3D-визуализации и компьютерной графики МИЭМ для подачи и обработки заявок на 3D-печать.
 
-Пользователь входит по одноразовому коду из корпоративной почты, заполняет профиль, прикладывает модели STL/STEP/3MF и следит за статусом заявки. Администратор управляет заявками, материалами, цветами, ролями и статистикой, а также может назначить конкретных администраторов получателями email-уведомлений о новых заявках.
+Пользователь входит по одноразовому коду из корпоративной почты, заполняет профиль, прикладывает модели STL/STEP/3MF или ZIP-архивы и следит за статусом заявки. Администратор управляет заявками, материалами, цветами, ролями и статистикой, а также может назначить конкретных администраторов получателями email-уведомлений о новых заявках.
 
 ## Быстрый запуск
 
@@ -21,9 +21,9 @@ docker compose up --build -d
 | Приложение | <http://localhost:3000> |
 | Проверка готовности | <http://localhost:3000/api/health> |
 | Liveness | <http://localhost:3000/api/health/live> |
-| Swagger UI | <http://localhost:3000/api/docs/> |
+| Swagger UI | <http://localhost:3000/api/swagger> (также `/api/docs/`) |
 
-Основной Compose публикует только TCP-порт `3000`. PostgreSQL, MinIO, Mailpit, backend и Prometheus доступны только контейнерам во внутренней Docker-сети. Для входа укажите адрес в домене `hse.ru`, `edu.hse.ru` или `miem.hse.ru`; при локальном запуске OTP отправляется во внутренний Mailpit.
+Основной Compose публикует только TCP-порт `3000`. PostgreSQL, MinIO, Mailpit и backend доступны только контейнерам во внутренней Docker-сети. Для входа укажите адрес в домене `hse.ru`, `edu.hse.ru` или `miem.hse.ru`; при локальном запуске OTP отправляется во внутренний Mailpit.
 
 Посмотреть список локальных писем, не открывая дополнительный порт:
 
@@ -50,7 +50,7 @@ docker compose logs --since=1m -f
 docker compose down
 ```
 
-Данные PostgreSQL, MinIO и Prometheus сохраняются в Docker volumes. Команда `docker compose down -v` удалит их без возможности восстановления и нужна только для полного сброса локального окружения.
+Данные PostgreSQL и MinIO сохраняются в Docker volumes. Команда `docker compose down -v` удалит их без возможности восстановления и нужна только для полного сброса локального окружения.
 
 ## Развертывание на Ubuntu-сервере с IPv6
 
@@ -111,15 +111,13 @@ cp .env.example .env
 
 Публичный порт намеренно зафиксирован как `3000:80` в `docker-compose.yml`, чтобы вспомогательные сервисы нельзя было случайно открыть переменной окружения. Перед публичным развертыванием обязательно замените JWT-секрет, пароли PostgreSQL/MinIO и настройте настоящий SMTP. Если пароль PostgreSQL содержит специальные символы URL, передайте отдельно корректно URL-кодированный `DATABASE_URL`.
 
-## Миграции и мониторинг
+## Миграции
 
 При `docker compose up` migrator выполняется до старта backend. Повторно применить все ещё не выполненные миграции:
 
 ```bash
 make migrate
 ```
-
-Prometheus собирает `/metrics` backend внутри Docker-сети и не публикует свой интерфейс на хост. Он хранит `app_http_requests_total`, `app_http_request_duration_seconds`, `app_sql_query_duration_seconds`, `app_sql_errors_total` и стандартные Go/process/database-pool метрики.
 
 ## Первый администратор
 
@@ -196,13 +194,12 @@ go vet ./...
 miem-3d-lab-print/
 ├── backend/
 │   ├── src/cmd/app/          # точка входа и сборка зависимостей
-│   ├── src/internal/         # config, GORM repositories, services, handlers, metrics
+│   ├── src/internal/         # config, GORM repositories, services, handlers
 │   ├── migrations/           # версионированный SQL migrator
 │   └── docs/                 # сгенерированная OpenAPI/Swagger документация
 ├── frontend/
 │   └── src/                  # React UI, API client, маршруты и типы
-├── monitoring/               # конфигурация Prometheus
-├── docker-compose.yml        # PostgreSQL, migrator, MinIO, Mailpit, backend, frontend, Prometheus
+├── docker-compose.yml        # PostgreSQL, migrator, MinIO, Mailpit, backend и frontend
 ├── Makefile                  # единые команды запуска и проверок
 ├── API.md                    # описание HTTP API и бизнес-правил
 └── DATABASE.md               # схема и инварианты базы данных
@@ -215,7 +212,6 @@ miem-3d-lab-print/
 - Go 1.25 и стандартный `net/http` с method-aware маршрутизацией;
 - GORM + PostgreSQL 17, транзакции через `gorm.DB.Transaction` и настраиваемый connection pool;
 - отдельный идемпотентный migrator с таблицей `schema_migrations` и advisory lock;
-- Prometheus: HTTP-метрики, длительность и ошибки GORM-запросов, статистика connection pool;
 - JWT, bcrypt OTP, MinIO/S3 и SMTP;
 - React 19, TypeScript, Vite, TanStack Query, SCSS, Vitest, Testing Library, ESLint, Stylelint и Prettier;
 - Docker Compose, nginx и GitHub Actions.
@@ -226,7 +222,7 @@ Nginx — единственная публичная точка входа: о�
 
 - [API.md](./API.md) — эндпоинты, форматы запросов, ошибки и правила перехода статусов.
 - [DATABASE.md](./DATABASE.md) — таблицы, связи, индексы и ограничения.
-- Swagger UI — `/api/docs/` у запущенного приложения.
+- Swagger UI — `/api/swagger` у запущенного приложения (прямой адрес: `/api/docs/`).
 - [frontend/README.md](./frontend/README.md) — детали frontend-разработки.
 
 ## Лицензия

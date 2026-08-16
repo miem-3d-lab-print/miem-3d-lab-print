@@ -1,7 +1,6 @@
 package services
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -39,8 +38,8 @@ func (s *StorageService) EnsureBucket(ctx context.Context) error {
 	return s.client.MakeBucket(ctx, s.bucket, minio.MakeBucketOptions{})
 }
 
-func (s *StorageService) Upload(ctx context.Context, objectPath string, data []byte, contentType string) error {
-	_, err := s.client.PutObject(ctx, s.bucket, objectPath, bytes.NewReader(data), int64(len(data)),
+func (s *StorageService) Upload(ctx context.Context, objectPath string, reader io.Reader, size int64, contentType string) error {
+	_, err := s.client.PutObject(ctx, s.bucket, objectPath, reader, size,
 		minio.PutObjectOptions{ContentType: contentType})
 	return err
 }

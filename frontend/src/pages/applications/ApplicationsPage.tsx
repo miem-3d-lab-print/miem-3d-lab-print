@@ -34,7 +34,7 @@ export function ApplicationsPage() {
     {query.isPending ? <LoadingState /> : query.isError ? <ErrorState message={getErrorMessage(query.error)} onRetry={() => void query.refetch()} /> : query.data.items.length === 0 ? <EmptyState title="Заявок нет" description={status ? 'В выбранном статусе заявок пока нет.' : 'Создайте первую заявку на 3D-печать.'} action={!status ? <Button onClick={() => navigate('/app/applications/new')}>Оформить заявку</Button> : undefined} /> : <>
       <div className="application-list">{query.data.items.map((app) => <Link to={`/app/applications/${app.id}`} className="application-card" key={app.id}>
         <div className="application-card__number"><Files size={18} /><strong>№ {app.number}</strong><span>{formatDate(app.created_at)}</span></div>
-        <div className="application-card__body"><strong>{app.material_name}{app.color_name ? ` · ${app.color_name}` : ' · цвет не важен'}</strong><span>Желаемая дата: {formatDate(app.desired_date)} · файлов: {app.files_count}</span></div>
+        <div className="application-card__body"><strong>{app.title}</strong><span>{app.material_name}{app.color_name ? ` · ${app.color_name}` : ' · цвет не важен'} · желаемая дата: {formatDate(app.desired_date)} · файлов: {app.files_count}</span></div>
         <StatusBadge status={app.status} />
       </Link>)}</div>
       <Pagination meta={query.data.meta} onPageChange={setPage} />

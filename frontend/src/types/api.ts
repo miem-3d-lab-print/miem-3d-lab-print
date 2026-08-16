@@ -8,7 +8,7 @@ export type ApplicationStatus =
   | 'rejected'
   | 'cancelled';
 export type ApplicationPosition = 'bachelor' | 'master' | 'postgraduate' | 'employee';
-export type FileFormat = 'STL' | 'STEP' | '3MF';
+export type FileFormat = 'STL' | 'STEP' | '3MF' | 'ZIP';
 
 export interface ApiErrorBody {
   error: {
@@ -98,6 +98,7 @@ export interface AdminMaterial extends Omit<Material, 'colors'> {
 export interface UserApplicationSummary {
   id: string;
   number: string;
+  title: string;
   status: ApplicationStatus;
   material_name: string;
   color_name: string | null;
@@ -124,6 +125,7 @@ export interface UserStatusHistory {
 export interface UserApplicationDetails {
   id: string;
   number: string;
+  title: string;
   status: ApplicationStatus;
   rejection_reason: string | null;
   position: ApplicationPosition;
@@ -133,6 +135,7 @@ export interface UserApplicationDetails {
   color: { id: string; snapshot_name: string } | null;
   desired_date: string;
   comment: string | null;
+  file_url: string | null;
   files: FileMeta[];
   files_delete_after: string | null;
   status_history: UserStatusHistory[];
@@ -142,6 +145,7 @@ export interface UserApplicationDetails {
 export interface CreatedApplication {
   id: string;
   number: string;
+  title: string;
   status: 'new';
   created_at: string;
 }
@@ -155,6 +159,7 @@ export interface CancelApplicationResponse {
 export interface AdminApplicationSummary {
   id: string;
   number: string;
+  title: string;
   full_name: string;
   created_at: string;
   desired_date: string;
@@ -179,6 +184,7 @@ export interface AdminStatusHistory {
 export interface AdminApplicationDetails {
   id: string;
   number: string;
+  title: string;
   applicant: {
     user_id: string;
     snapshot_full_name: string;
@@ -193,6 +199,7 @@ export interface AdminApplicationDetails {
   color: { id: string; snapshot_name: string } | null;
   desired_date: string;
   comment: string | null;
+  file_url: string | null;
   status: ApplicationStatus;
   rejection_reason: string | null;
   files: FileMeta[];

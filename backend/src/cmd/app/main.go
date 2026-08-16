@@ -29,7 +29,6 @@ import (
 	"github.com/miem-3d-lab-print/miem-3d-lab-print/backend/src/internal/config"
 	"github.com/miem-3d-lab-print/miem-3d-lab-print/backend/src/internal/db"
 	"github.com/miem-3d-lab-print/miem-3d-lab-print/backend/src/internal/handlers"
-	appmetrics "github.com/miem-3d-lab-print/miem-3d-lab-print/backend/src/internal/metrics"
 	"github.com/miem-3d-lab-print/miem-3d-lab-print/backend/src/internal/middleware"
 	"github.com/miem-3d-lab-print/miem-3d-lab-print/backend/src/internal/repository"
 	"github.com/miem-3d-lab-print/miem-3d-lab-print/backend/src/internal/services"
@@ -66,11 +65,6 @@ func run(logger *slog.Logger) error {
 		}
 	}()
 
-	applicationMetrics := appmetrics.New("miem-3d-lab-print", sqlDB)
-	if err := applicationMetrics.InstrumentGORM(database); err != nil {
-		return fmt.Errorf("instrument GORM: %w", err)
-	}
-
 	storageService, err := services.NewStorageService(cfg.MinIO)
 	if err != nil {
 		return fmt.Errorf("initialize object storage: %w", err)
@@ -103,7 +97,7 @@ func run(logger *slog.Logger) error {
 
 	// Services
 	jwtService := services.NewJWTService(cfg.JWT.Secret)
-	emailService := services.NewEmailService(cfg.SMTP)
+	emailService := services.NewEmailService(cfg.SMTP, cfg.SiteURL)
 	authService := services.NewAuthService(
 		logger, emailService, otpRepo, rateLimitRepo, userRepo, refreshTokenRepo, jwtService,
 	)
@@ -140,14 +134,14 @@ func run(logger *slog.Logger) error {
 	adminHandler.Register(apiMux, authMW, adminMW)
 
 	apiMux.Handle("/api/docs/", httpSwagger.WrapHandler)
-
-	root := http.NewServeMux()
-	root.Handle("GET /metrics", applicationMetrics.Handler())
-	root.Handle("/", applicationMetrics.Middleware(corsMW(apiMux)))
+	apiMux.HandleFunc("GET /api/swagger", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/api/docs/", http.StatusTemporaryRedirect)
+	})
+	apiMux.Handle("/api/swagger/", httpSwagger.WrapHandler)
 
 	server := &http.Server{
 		Addr:              cfg.Server.Address,
-		Handler:           root,
+		Handler:           corsMW(apiMux),
 		ReadHeaderTimeout: cfg.Server.ReadHeaderTimeout,
 		ReadTimeout:       cfg.Server.ReadTimeout,
 		WriteTimeout:      cfg.Server.WriteTimeout,

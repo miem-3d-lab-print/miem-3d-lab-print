@@ -191,6 +191,8 @@ p { line-height: 1.65; }
 .contact-list { display: flex; flex-direction: column; gap: 12px; }
 .contact-list span { display: flex; align-items: center; gap: 10px; font-size: 12px; }
 .contact-list svg { color: var(--accent); }
+.contact-list a { color: var(--accent-dark); text-decoration: underline; text-underline-offset: 2px; }
+.external-file-link { display: inline-flex; align-items: center; gap: 7px; margin-top: 12px; color: var(--accent-dark); font-size: 12px; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
 
 .wizard-steps { display: grid; grid-template-columns: repeat(3, 1fr); margin-bottom: 18px; }
 .wizard-step { position: relative; display: flex; align-items: center; gap: 9px; color: #a59e98; font-size: 11px; }
@@ -223,6 +225,11 @@ p { line-height: 1.65; }
 .selected-files strong { font-size: 12px; }
 .selected-files small { color: var(--muted); font-size: 10px; }
 .selected-files button { border: 0; background: transparent; color: var(--danger); cursor: pointer; }
+.upload-progress { width: 100%; padding: 12px 14px; border: 1px solid #ead7c9; border-radius: 6px; background: #fffaf6; }
+.upload-progress__label { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; color: var(--muted); font-size: 11px; }
+.upload-progress__label strong { color: var(--accent-dark); }
+.upload-progress__track { height: 7px; overflow: hidden; border-radius: 4px; background: #eee7e1; }
+.upload-progress__track span { display: block; width: 0; height: 100%; border-radius: inherit; background: var(--accent); transition: width .2s ease; }
 
 .admin-tabs { display: flex; gap: 26px; border-bottom: 1px solid var(--line); margin-bottom: 28px; overflow-x: auto; }
 .admin-tabs a { padding: 12px 2px; text-decoration: none; color: var(--muted); font-size: 12px; font-weight: 700; border-bottom: 2px solid transparent; white-space: nowrap; }

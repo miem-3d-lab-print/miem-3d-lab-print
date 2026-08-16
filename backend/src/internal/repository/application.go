@@ -114,8 +114,8 @@ func (repository *GORMApplicationRepository) ListAdmin(filter dto.ApplicationFil
 	}
 	if filter.Search != "" {
 		query = query.Where(
-			"lower(snapshot_full_name) LIKE lower(?) OR number = ?",
-			"%"+filter.Search+"%", filter.Search,
+			"lower(snapshot_full_name) LIKE lower(?) OR lower(title) LIKE lower(?) OR number = ?",
+			"%"+filter.Search+"%", "%"+filter.Search+"%", filter.Search,
 		)
 	}
 

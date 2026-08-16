@@ -84,6 +84,7 @@ applications
 'STL'   — STL (бинарный, ≥ 84 байта)
 'STEP'  — STEP/STP (начинается с "ISO-10303-21")
 '3MF'   — 3MF (ZIP-архив, сигнатура 0x504B)
+'ZIP'   — ZIP-архив с одной или несколькими 3D-моделями
 ```
 
 ---
@@ -205,6 +206,7 @@ Refresh-токены с поддержкой rotation и обнаружения 
 |---------|-----|----------|-------------|---------|
 | `id` | UUID | NOT NULL | `gen_random_uuid()` | PK |
 | `number` | VARCHAR(12) | NOT NULL | — | Уникальный номер `YYYY-NNNN` |
+| `title` | VARCHAR(255) | NOT NULL | `'Заявка на 3D-печать'` | Название заявки |
 | `user_id` | UUID | NOT NULL | — | FK → `users.id` RESTRICT DELETE |
 | `snapshot_full_name` | VARCHAR(255) | NOT NULL | — | ФИО заявителя на момент подачи |
 | `snapshot_email` | VARCHAR(255) | NOT NULL | — | Email заявителя на момент подачи |
@@ -217,6 +219,7 @@ Refresh-токены с поддержкой rotation и обнаружения 
 | `snapshot_color_name` | VARCHAR(100) | NULL | — | Название цвета на момент подачи |
 | `desired_date` | DATE | NOT NULL | — | Желаемая дата получения |
 | `comment` | TEXT | NULL | — | Комментарий заявителя |
+| `file_url` | TEXT | NULL | — | HTTP(S)-ссылка на файл вместо загрузки |
 | `status` | `application_status` | NOT NULL | `'new'` | Текущий статус |
 | `rejection_reason` | TEXT | NULL | — | Причина отклонения (только для `rejected`) |
 | `files_delete_after` | TIMESTAMPTZ | NULL | — | Дата удаления файлов (TTL) |

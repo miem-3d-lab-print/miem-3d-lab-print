@@ -4,7 +4,7 @@
 
 **Аутентификация:** Bearer JWT в заголовке `Authorization: Bearer <access_token>`
 
-**OpenAPI-спецификация:** [`backend/docs/swagger.yaml`](./backend/docs/swagger.yaml) | Swagger UI: `http://localhost:3000/api/docs/` (Compose)
+**OpenAPI-спецификация:** [`backend/docs/swagger.yaml`](./backend/docs/swagger.yaml) | Swagger UI: `http://localhost:3000/api/swagger` (Compose; также доступен `/api/docs/`)
 
 ---
 
@@ -89,7 +89,8 @@
 - Выбранный материал и цвет должны быть активными (`is_active = true`).
 
 **Файлы при создании:**
-- Форматы: STL, STEP, 3MF. Проверяется по расширению и сигнатуре байт.
+- Форматы: STL, STEP, 3MF, ZIP. Проверяется по расширению и сигнатуре байт.
+- ZIP должен быть корректным архивом и содержать хотя бы одну валидную STL/STEP/STP/3MF-модель. До 100 элементов и до 200 МБ суммарного распакованного размера.
 - Максимальный размер одного файла: **20 МБ**.
 - Лимит файлов на заявку: **10 файлов** (суммарно, включая загруженные позже).
 
@@ -367,6 +368,7 @@ cancelled — финальный, установлен пользователе�
 
 | Поле | Тип | Обязательное | Описание |
 |------|-----|-------------|---------|
+| `title` | string | да | Название заявки, до 255 символов |
 | `position` | string | да | `bachelor`, `master`, `postgraduate`, `employee` |
 | `purpose` | string | да | Цель печати |
 | `material_id` | UUID | да | ID активного материала |
@@ -374,13 +376,15 @@ cancelled — финальный, установлен пользователе�
 | `color_id` | UUID | если `color_matters=true` | ID активного цвета |
 | `desired_date` | date (`YYYY-MM-DD`) | да | Желаемая дата (не в прошлом) |
 | `comment` | string | нет | Комментарий |
-| `files[]` | binary (multiple) | нет | STL/STEP/3MF, до 20 МБ каждый |
+| `file_url` | URL | если нет `files[]` | HTTP(S)-ссылка на файл или архив, до 2048 символов |
+| `files[]` | binary (multiple) | если нет `file_url` | STL/STEP/3MF/ZIP, до 20 МБ каждый |
 
 **Response 201:**
 ```json
 {
   "id": "uuid",
   "number": "2026-0001",
+  "title": "Корпус датчика",
   "status": "new",
   "created_at": "2026-07-13T10:00:00Z"
 }
@@ -389,6 +393,8 @@ cancelled — финальный, установлен пользователе�
 | Код | HTTP | Условие |
 |-----|------|---------|
 | `PROFILE_NOT_FOUND` | 404 | Профиль не существует |
+| `INVALID_APPLICATION_TITLE` | 422 | Название пустое или длиннее 255 символов |
+| `INVALID_FILE_URL` | 422 | Ссылка не использует HTTP(S) или некорректна |
 | `PROFILE_INCOMPLETE` | 409 | Не заполнен `full_name` или не указан ни один контакт |
 | `ACTIVE_LIMIT_REACHED` | 409 | Достигнут лимит в 10 активных заявок |
 | `DESIRED_DATE_IN_PAST` | 400 | Желаемая дата в прошлом |
@@ -397,7 +403,7 @@ cancelled — финальный, установлен пользователе�
 | `COLOR_REQUIRED` | 400 | `color_matters=true`, но `color_id` не передан |
 | `COLOR_NOT_FOUND` | 404 | Цвет не найден |
 | `COLOR_NOT_AVAILABLE` | 409 | Цвет деактивирован |
-| `INVALID_FILE_FORMAT` | 400 | Формат файла не STL/STEP/3MF |
+| `INVALID_FILE_FORMAT` | 400 | Формат файла не STL/STEP/3MF/ZIP или ZIP не прошёл проверку |
 | `FILE_TOO_LARGE` | 413 | Файл превышает 20 МБ |
 
 ---
@@ -474,7 +480,7 @@ cancelled — финальный, установлен пользователе�
 
 | Поле | Описание |
 |------|---------|
-| `file` | Один файл STL/STEP/3MF, до 20 МБ |
+| `file` | Один файл STL/STEP/3MF/ZIP, до 20 МБ |
 
 **Response 201:**
 ```json
@@ -968,7 +974,7 @@ cancelled — финальный, установлен пользователе�
 | `COLOR_NOT_AVAILABLE` | 409 | Цвет деактивирован |
 | `COLOR_NAME_EXISTS` | 409 | Цвет с таким именем уже существует |
 | `FILE_TOO_LARGE` | 413 | Файл превышает 20 МБ |
-| `INVALID_FILE_FORMAT` | 400 | Неверный формат файла (не STL/STEP/3MF) |
+| `INVALID_FILE_FORMAT` | 400 | Неверный формат файла (не STL/STEP/3MF/ZIP) |
 | `FILES_REQUIRED` | 400 | Файл не передан |
 | `FILES_LOCKED` | 409 | Загрузка файлов недоступна (статус не `new`) |
 | `FILES_LIMIT_REACHED` | 409 | Достигнут лимит в 10 файлов на заявку |

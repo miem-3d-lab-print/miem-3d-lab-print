@@ -5,7 +5,6 @@ import { materialsApi } from '../api/endpoints';
 import { useAuth } from '../auth/AuthContext';
 import { Button } from '../components/ui/Button';
 import { getMaterialColor } from '../utils/format';
-import hero from '../assets/hero.webp';
 
 const fallbackMaterials = [
   { id: 'pla', name: 'PLA', description: 'Жёсткий и экологичный пластик', colors: [{ id: '1', name: 'Красный' }, { id: '2', name: 'Белый' }, { id: '3', name: 'Чёрный' }] },
@@ -36,14 +35,14 @@ export function HomePage() {
             <Button size="lg" variant="secondary" onClick={() => document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' })}>Как это работает</Button>
           </div>
         </div>
-        <div className="hero-image"><img src={hero} alt="Интерфейс сервиса 3D-печати МИЭМ" /></div>
+        <div className="hero-image"><img src="/images/hero.webp?v=20260816" alt="Интерфейс сервиса 3D-печати МИЭМ" /></div>
       </section>
 
       <section className="home-section home-section--white" id="how">
         <div className="section-heading"><div><span className="eyebrow">ПРОЦЕСС</span><h2>Как это работает</h2></div></div>
         <div className="steps-grid">
           {[
-            [FileUp, 'Заявка', 'Заполните форму и загрузите STL, STEP или 3MF.'],
+            [FileUp, 'Заявка', 'Заполните форму и загрузите STL, STEP, 3MF или ZIP-архив.'],
             [Layers3, 'Материал', 'Выберите доступный материал и, при необходимости, цвет.'],
             [Printer, 'Печать', 'Следите за изменением статуса в личном кабинете.'],
             [PackageCheck, 'Выдача', 'Получите готовую модель в аудитории 211.'],

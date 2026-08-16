@@ -1,3 +1,4 @@
+import type { AxiosProgressEvent } from 'axios';
 import { apiClient } from './client';
 import type {
   AdminApplicationDetails, AdminApplicationNotificationsResponse, AdminApplicationSummary, AdminMaterial, AdminStats,
@@ -32,6 +33,7 @@ export interface UserApplicationListParams {
 }
 
 export interface CreateApplicationPayload {
+  title: string;
   position: string;
   purpose: string;
   material_id: string;
@@ -39,15 +41,26 @@ export interface CreateApplicationPayload {
   color_id?: string;
   desired_date: string;
   comment?: string;
+  file_url?: string;
   files: File[];
+}
+
+export type UploadProgressCallback = (progress: number) => void;
+
+function reportUploadProgress(callback?: UploadProgressCallback) {
+  return (event: AxiosProgressEvent) => {
+    if (!callback || !event.total) return;
+    callback(Math.min(100, Math.round((event.loaded / event.total) * 100)));
+  };
 }
 
 export const applicationsApi = {
   list: async (params: UserApplicationListParams) =>
     (await apiClient.get<PaginatedResponse<UserApplicationSummary>>('/applications', { params })).data,
   get: async (id: string) => (await apiClient.get<UserApplicationDetails>(`/applications/${id}`)).data,
-  create: async (payload: CreateApplicationPayload) => {
+  create: async (payload: CreateApplicationPayload, onProgress?: UploadProgressCallback) => {
     const body = new FormData();
+    body.append('title', payload.title);
     body.append('position', payload.position);
     body.append('purpose', payload.purpose);
     body.append('material_id', payload.material_id);
@@ -55,14 +68,21 @@ export const applicationsApi = {
     if (payload.color_matters && payload.color_id) body.append('color_id', payload.color_id);
     body.append('desired_date', payload.desired_date);
     if (payload.comment) body.append('comment', payload.comment);
+    if (payload.file_url) body.append('file_url', payload.file_url);
     payload.files.forEach((file) => body.append(FILE_FIELD_NAME, file));
-    return (await apiClient.post<CreatedApplication>('/applications', body, { timeout: FILE_TRANSFER_TIMEOUT })).data;
+    return (await apiClient.post<CreatedApplication>('/applications', body, {
+      timeout: FILE_TRANSFER_TIMEOUT,
+      onUploadProgress: reportUploadProgress(onProgress),
+    })).data;
   },
   cancel: async (id: string) => (await apiClient.patch<CancelApplicationResponse>(`/applications/${id}/cancel`)).data,
-  uploadFile: async (id: string, file: File) => {
+  uploadFile: async (id: string, file: File, onProgress?: UploadProgressCallback) => {
     const body = new FormData();
     body.append('file', file);
-    return (await apiClient.post<FileMeta>(`/applications/${id}/files`, body, { timeout: FILE_TRANSFER_TIMEOUT })).data;
+    return (await apiClient.post<FileMeta>(`/applications/${id}/files`, body, {
+      timeout: FILE_TRANSFER_TIMEOUT,
+      onUploadProgress: reportUploadProgress(onProgress),
+    })).data;
   },
   downloadFile: async (applicationId: string, fileId: string) =>
     apiClient.get<Blob>(`/applications/${applicationId}/files/${fileId}`, { responseType: 'blob', timeout: FILE_TRANSFER_TIMEOUT }),
