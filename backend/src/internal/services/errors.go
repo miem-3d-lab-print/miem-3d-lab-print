@@ -206,6 +206,10 @@ type ErrLastAdmin struct{}
 
 func (e *ErrLastAdmin) Error() string { return "LAST_ADMIN" }
 
+type ErrUserNotAdmin struct{}
+
+func (e *ErrUserNotAdmin) Error() string { return "USER_NOT_ADMIN" }
+
 type ErrQueryTooShort struct{}
 
 func (e *ErrQueryTooShort) Error() string { return "QUERY_TOO_SHORT" }

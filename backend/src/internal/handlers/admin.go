@@ -30,8 +30,31 @@ func (h *AdminHandler) Register(
 	adminMW func(http.Handler) http.Handler,
 ) {
 	mux.Handle("GET /api/admin/users", authMW(adminMW(http.HandlerFunc(h.SearchUsers))))
+	mux.Handle("GET /api/admin/admins", authMW(adminMW(http.HandlerFunc(h.ListAdmins))))
 	mux.Handle("PATCH /api/admin/users/{id}/role", authMW(adminMW(http.HandlerFunc(h.SetRole))))
+	mux.Handle("PATCH /api/admin/users/{id}/application-notifications", authMW(adminMW(http.HandlerFunc(h.SetApplicationNotifications))))
 	mux.Handle("GET /api/admin/stats", authMW(adminMW(http.HandlerFunc(h.Stats))))
+}
+
+// ListAdmins возвращает всех текущих администраторов.
+//
+//	@Summary	Список администраторов
+//	@Tags		admin-users
+//	@Produce	json
+//	@Security	BearerAuth
+//	@Success	200	{object}	dto.AdminUsersResponse
+//	@Failure	401	{object}	apierr.ErrorResponse
+//	@Failure	403	{object}	apierr.ErrorResponse
+//	@Failure	500	{object}	apierr.ErrorResponse
+//	@Router		/api/admin/admins [get]
+func (h *AdminHandler) ListAdmins(w http.ResponseWriter, _ *http.Request) {
+	resp, err := h.adminService.ListAdmins()
+	if err != nil {
+		h.logger.Error("list admins", "err", err)
+		apierr.Write(w, http.StatusInternalServerError, "INTERNAL_ERROR", "Внутренняя ошибка сервера", nil)
+		return
+	}
+	writeJSON(w, http.StatusOK, resp)
 }
 
 // SearchUsers выполняет поиск пользователей по email.
@@ -109,6 +132,56 @@ func (h *AdminHandler) SetRole(w http.ResponseWriter, r *http.Request) {
 				"Нельзя снять роль с последнего администратора", nil)
 		default:
 			h.logger.Error("set role", "err", err)
+			apierr.Write(w, http.StatusInternalServerError, "INTERNAL_ERROR", "Внутренняя ошибка сервера", nil)
+		}
+		return
+	}
+	writeJSON(w, http.StatusOK, resp)
+}
+
+// SetApplicationNotifications включает или отключает email-уведомления о новых заявках.
+//
+//	@Summary	Настроить уведомления администратора о новых заявках
+//	@Tags		admin-users
+//	@Accept		json
+//	@Produce	json
+//	@Security	BearerAuth
+//	@Param		id		path		string											true	"ID администратора"	format(uuid)
+//	@Param		request	body		dto.SetApplicationNotificationsRequest	true	"Состояние уведомлений"
+//	@Success	200		{object}	dto.SetApplicationNotificationsResponse
+//	@Failure	400		{object}	apierr.ErrorResponse
+//	@Failure	401		{object}	apierr.ErrorResponse
+//	@Failure	403		{object}	apierr.ErrorResponse
+//	@Failure	404		{object}	apierr.ErrorResponse
+//	@Failure	409		{object}	apierr.ErrorResponse	"Пользователь не является администратором"
+//	@Failure	500		{object}	apierr.ErrorResponse
+//	@Router		/api/admin/users/{id}/application-notifications [patch]
+func (h *AdminHandler) SetApplicationNotifications(w http.ResponseWriter, r *http.Request) {
+	id, err := uuid.Parse(r.PathValue("id"))
+	if err != nil {
+		apierr.Write(w, http.StatusNotFound, "USER_NOT_FOUND", "Пользователь не найден", nil)
+		return
+	}
+
+	var req dto.SetApplicationNotificationsRequest
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&req); err != nil || req.Enabled == nil {
+		apierr.Write(w, http.StatusBadRequest, "VALIDATION_ERROR", "Некорректное тело запроса", nil)
+		return
+	}
+
+	resp, err := h.adminService.SetApplicationNotifications(id, *req.Enabled)
+	if err != nil {
+		var notFound *services.ErrUserNotFound
+		var notAdmin *services.ErrUserNotAdmin
+		switch {
+		case errors.As(err, &notFound):
+			apierr.Write(w, http.StatusNotFound, "USER_NOT_FOUND", "Пользователь не найден", nil)
+		case errors.As(err, &notAdmin):
+			apierr.Write(w, http.StatusConflict, "USER_NOT_ADMIN", "Пользователь больше не является администратором", nil)
+		default:
+			h.logger.Error("set application notifications", "err", err)
 			apierr.Write(w, http.StatusInternalServerError, "INTERNAL_ERROR", "Внутренняя ошибка сервера", nil)
 		}
 		return

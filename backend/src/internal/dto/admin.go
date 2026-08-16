@@ -3,11 +3,12 @@ package dto
 import "time"
 
 type AdminUserItem struct {
-	ID        string    `json:"id"`
-	Email     string    `json:"email"`
-	FullName  *string   `json:"full_name"`
-	Role      string    `json:"role"`
-	CreatedAt time.Time `json:"created_at"`
+	ID                       string    `json:"id"`
+	Email                    string    `json:"email"`
+	FullName                 *string   `json:"full_name"`
+	Role                     string    `json:"role"`
+	ApplicationNotifications bool      `json:"application_notifications"`
+	CreatedAt                time.Time `json:"created_at"`
 }
 
 type AdminUsersResponse struct {
@@ -22,6 +23,16 @@ type SetRoleResponse struct {
 	ID    string `json:"id"`
 	Email string `json:"email"`
 	Role  string `json:"role"`
+}
+
+type SetApplicationNotificationsRequest struct {
+	Enabled *bool `json:"enabled"`
+}
+
+type SetApplicationNotificationsResponse struct {
+	ID                       string `json:"id"`
+	Email                    string `json:"email"`
+	ApplicationNotifications bool   `json:"application_notifications"`
 }
 
 type ByMaterialStat struct {

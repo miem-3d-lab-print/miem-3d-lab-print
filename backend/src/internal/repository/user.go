@@ -19,7 +19,10 @@ type UserRepository interface {
 	UpdateProfile(id uuid.UUID, fullName, telegram, max *string) (*models.User, error)
 	GiveConsent(id uuid.UUID) (*models.User, error)
 	SearchByEmail(query string, limit int) ([]*models.User, error)
+	ListAdmins() ([]*models.User, error)
+	ListApplicationNotificationRecipients() ([]*models.User, error)
 	SetRole(tx DBTX, id uuid.UUID, role string) (*models.User, error)
+	SetApplicationNotifications(tx DBTX, id uuid.UUID, enabled bool) (*models.User, error)
 	CountAdmins(tx DBTX) (int, error)
 }
 
@@ -108,11 +111,46 @@ func (repository *GORMUserRepository) SearchByEmail(query string, limit int) ([]
 	return users, err
 }
 
+func (repository *GORMUserRepository) ListAdmins() ([]*models.User, error) {
+	var users []*models.User
+	err := repository.db.Where("role = ?", models.UserRoleAdmin).Order("email").Find(&users).Error
+	return users, err
+}
+
+func (repository *GORMUserRepository) ListApplicationNotificationRecipients() ([]*models.User, error) {
+	var users []*models.User
+	err := repository.db.
+		Where("role = ? AND application_notifications = ?", models.UserRoleAdmin, true).
+		Order("email").
+		Find(&users).Error
+	return users, err
+}
+
 func (repository *GORMUserRepository) SetRole(tx DBTX, id uuid.UUID, role string) (*models.User, error) {
-	if err := tx.Model(&models.User{}).Where("id = ?", id).Updates(map[string]any{
-		"role": role, "updated_at": time.Now(),
-	}).Error; err != nil {
+	updates := map[string]any{"role": role, "updated_at": time.Now()}
+	if role != models.UserRoleAdmin {
+		updates["application_notifications"] = false
+	}
+	if err := tx.Model(&models.User{}).Where("id = ?", id).Updates(updates).Error; err != nil {
 		return nil, err
+	}
+
+	var user models.User
+	return entityOrNil(&user, tx.First(&user, "id = ?", id))
+}
+
+func (repository *GORMUserRepository) SetApplicationNotifications(tx DBTX, id uuid.UUID, enabled bool) (*models.User, error) {
+	result := tx.Model(&models.User{}).
+		Where("id = ? AND role = ?", id, models.UserRoleAdmin).
+		Updates(map[string]any{
+			"application_notifications": enabled,
+			"updated_at":                time.Now(),
+		})
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result.RowsAffected == 0 {
+		return nil, nil
 	}
 
 	var user models.User

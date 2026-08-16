@@ -51,7 +51,8 @@ install_jq() {
 }
 
 check_host_ipv6() {
-  [[ -s /proc/net/if_inet6 ]] || fail "IPv6 is disabled on the host"
+  [[ -r /proc/net/if_inet6 ]] || fail "the host does not expose IPv6 network state"
+  grep -q '[^[:space:]]' /proc/net/if_inet6 || fail "IPv6 is disabled on the host"
 
   if command -v ip >/dev/null 2>&1 && [[ -z "$(ip -6 route show default)" ]]; then
     fail "the host has no default IPv6 route; configure IPv6 at the hosting provider first"

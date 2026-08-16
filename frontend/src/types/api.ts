@@ -217,6 +217,7 @@ export interface AdminUser {
   email: string;
   full_name: string | null;
   role: Role;
+  application_notifications: boolean;
   created_at: string;
 }
 
@@ -224,6 +225,12 @@ export interface AdminUserRoleResponse {
   id: string;
   email: string;
   role: Role;
+}
+
+export interface AdminApplicationNotificationsResponse {
+  id: string;
+  email: string;
+  application_notifications: boolean;
 }
 
 export interface AdminStats {

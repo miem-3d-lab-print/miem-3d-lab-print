@@ -304,6 +304,30 @@ func (s *ApplicationService) Create(
 		s.logger.Error("send application created email", "err", err, "number", number)
 	}
 
+	adminRecipients, err := s.userRepo.ListApplicationNotificationRecipients()
+	if err != nil {
+		s.logger.Error("list application notification recipients", "err", err, "number", number)
+	} else {
+		for _, recipient := range adminRecipients {
+			if err := s.emailService.SendNewApplicationToAdmin(
+				recipient.Email,
+				number,
+				*user.FullName,
+				user.Email,
+				matName,
+				desiredDate.Format("02.01.2006"),
+				purpose,
+			); err != nil {
+				s.logger.Error(
+					"send new application email to admin",
+					"err", err,
+					"number", number,
+					"admin_id", recipient.ID,
+				)
+			}
+		}
+	}
+
 	return &dto.CreateApplicationResponse{
 		ID:        app.ID.String(),
 		Number:    app.Number,

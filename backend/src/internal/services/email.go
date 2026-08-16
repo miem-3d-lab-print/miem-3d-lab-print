@@ -46,6 +46,17 @@ func (s *EmailService) SendApplicationCreated(to, number string) error {
 	return s.send(to, subject, body)
 }
 
+func (s *EmailService) SendNewApplicationToAdmin(
+	to, number, applicantName, applicantEmail, materialName, desiredDate, purpose string,
+) error {
+	subject := fmt.Sprintf("Новая заявка №%s", number)
+	body := fmt.Sprintf(
+		"Поступила новая заявка №%s.\n\nЗаявитель: %s\nEmail: %s\nМатериал: %s\nЖелаемая дата: %s\nЦель: %s",
+		number, applicantName, applicantEmail, materialName, desiredDate, purpose,
+	)
+	return s.send(to, subject, body)
+}
+
 func (s *EmailService) SendStatusChanged(to, number, status, rejectionReason string) error {
 	var subject, body string
 	switch status {

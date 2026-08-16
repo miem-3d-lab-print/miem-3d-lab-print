@@ -23,6 +23,17 @@ func NewAdminService(logger *slog.Logger, txMgr repository.TxManager, userRepo r
 	return &AdminService{logger: logger, txMgr: txMgr, userRepo: userRepo}
 }
 
+func adminUserItem(user *models.User) *dto.AdminUserItem {
+	return &dto.AdminUserItem{
+		ID:                       user.ID.String(),
+		Email:                    user.Email,
+		FullName:                 user.FullName,
+		Role:                     user.Role,
+		ApplicationNotifications: user.ApplicationNotifications,
+		CreatedAt:                user.CreatedAt,
+	}
+}
+
 func (s *AdminService) SearchUsers(query string) (*dto.AdminUsersResponse, error) {
 	if len(query) < 3 {
 		return nil, &ErrQueryTooShort{}
@@ -33,13 +44,20 @@ func (s *AdminService) SearchUsers(query string) (*dto.AdminUsersResponse, error
 	}
 	items := make([]*dto.AdminUserItem, 0, len(users))
 	for _, u := range users {
-		items = append(items, &dto.AdminUserItem{
-			ID:        u.ID.String(),
-			Email:     u.Email,
-			FullName:  u.FullName,
-			Role:      u.Role,
-			CreatedAt: u.CreatedAt,
-		})
+		items = append(items, adminUserItem(u))
+	}
+	return &dto.AdminUsersResponse{Items: items}, nil
+}
+
+func (s *AdminService) ListAdmins() (*dto.AdminUsersResponse, error) {
+	users, err := s.userRepo.ListAdmins()
+	if err != nil {
+		return nil, fmt.Errorf("list admins: %w", err)
+	}
+
+	items := make([]*dto.AdminUserItem, 0, len(users))
+	for _, user := range users {
+		items = append(items, adminUserItem(user))
 	}
 	return &dto.AdminUsersResponse{Items: items}, nil
 }
@@ -90,6 +108,38 @@ func (s *AdminService) SetRole(targetID uuid.UUID, role string) (*dto.SetRoleRes
 
 	s.logger.Info("role changed", "user_id", targetID, "new_role", role)
 	return &dto.SetRoleResponse{ID: updated.ID.String(), Email: updated.Email, Role: updated.Role}, nil
+}
+
+func (s *AdminService) SetApplicationNotifications(targetID uuid.UUID, enabled bool) (*dto.SetApplicationNotificationsResponse, error) {
+	target, err := s.userRepo.FindByID(targetID)
+	if err != nil {
+		return nil, fmt.Errorf("find user: %w", err)
+	}
+	if target == nil {
+		return nil, &ErrUserNotFound{}
+	}
+	if target.Role != models.UserRoleAdmin {
+		return nil, &ErrUserNotAdmin{}
+	}
+
+	var updated *models.User
+	if err := s.txMgr.RunInTx(context.Background(), func(tx repository.DBTX) error {
+		updated, err = s.userRepo.SetApplicationNotifications(tx, targetID, enabled)
+		return err
+	}); err != nil {
+		return nil, fmt.Errorf("set application notifications: %w", err)
+	}
+	// The role may have changed between the initial lookup and the update.
+	if updated == nil {
+		return nil, &ErrUserNotAdmin{}
+	}
+
+	s.logger.Info("application notifications changed", "user_id", targetID, "enabled", enabled)
+	return &dto.SetApplicationNotificationsResponse{
+		ID:                       updated.ID.String(),
+		Email:                    updated.Email,
+		ApplicationNotifications: updated.ApplicationNotifications,
+	}, nil
 }
 
 // StatsService assembles statistics from the StatsRepository.

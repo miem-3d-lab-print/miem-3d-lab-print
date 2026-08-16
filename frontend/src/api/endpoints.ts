@@ -1,7 +1,7 @@
 import { apiClient } from './client';
 import type {
-  AdminApplicationDetails, AdminApplicationSummary, AdminMaterial, AdminStats, AdminStatusPatch,
-  AdminStatusPatchResponse, AdminUser, AdminUserRoleResponse, CancelApplicationResponse,
+  AdminApplicationDetails, AdminApplicationNotificationsResponse, AdminApplicationSummary, AdminMaterial, AdminStats,
+  AdminStatusPatch, AdminStatusPatchResponse, AdminUser, AdminUserRoleResponse, CancelApplicationResponse,
   ConsentResponse, CreatedApplication, FileMeta, Material, PaginatedResponse, Profile, ProfilePatch,
   RefreshResponse, RequestOtpResponse, Role, UserApplicationDetails, UserApplicationSummary, VerifyOtpResponse,
 } from '../types/api';
@@ -114,8 +114,11 @@ export const adminMaterialsApi = {
 
 export const adminUsersApi = {
   search: async (email: string) => (await apiClient.get<{ items: AdminUser[] }>('/admin/users', { params: { email } })).data.items,
+  listAdmins: async () => (await apiClient.get<{ items: AdminUser[] }>('/admin/admins')).data.items,
   setRole: async (id: string, role: Role) =>
     (await apiClient.patch<AdminUserRoleResponse>(`/admin/users/${id}/role`, { role })).data,
+  setApplicationNotifications: async (id: string, enabled: boolean) =>
+    (await apiClient.patch<AdminApplicationNotificationsResponse>(`/admin/users/${id}/application-notifications`, { enabled })).data,
 };
 
 export const adminStatsApi = {
