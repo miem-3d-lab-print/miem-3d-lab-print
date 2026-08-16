@@ -1,0 +1,1 @@
+ALTER TYPE file_format ADD VALUE IF NOT EXISTS 'ZIP';
