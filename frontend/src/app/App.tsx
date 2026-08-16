@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from '../components/layout/AppLayout';
-import { AdminRoute, ConsentGuard, ProfileCompleteGuard, ProtectedRoute } from '../components/guards';
+import { AdminRoute, AnonymousRoute, ConsentGuard, ProfileCompleteGuard, ProtectedRoute } from '../components/guards';
 import { HomePage } from '../pages/HomePage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { ConsentPage } from '../pages/ConsentPage';
@@ -25,8 +25,8 @@ export function App() {
     <Routes>
       <Route element={<AppLayout />}>
         <Route index element={<HomePage />} />
-        <Route path="auth/login" element={<LoginPage />} />
-        <Route path="auth/verify" element={<VerifyOtpPage />} />
+        <Route path="auth/login" element={<AnonymousRoute><LoginPage /></AnonymousRoute>} />
+        <Route path="auth/verify" element={<AnonymousRoute><VerifyOtpPage /></AnonymousRoute>} />
         <Route path="consent" element={<ProtectedRoute><ConsentPage /></ProtectedRoute>} />
         <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
 

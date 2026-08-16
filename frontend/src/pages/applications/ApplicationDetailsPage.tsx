@@ -12,6 +12,7 @@ import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import type { FileMeta } from '../../types/api';
 import { ALLOWED_FILE_EXTENSIONS, MAX_FILE_SIZE, MAX_FILES_PER_APPLICATION, POSITION_LABELS, STATUS_LABELS } from '../../utils/constants';
+import { downloadBlob } from '../../utils/download';
 import { getErrorMessage } from '../../utils/errors';
 import { formatDate, formatDateTime } from '../../utils/format';
 
@@ -48,9 +49,7 @@ export function ApplicationDetailsPage() {
     setDownloadingId(file.id);
     try {
       const response = await applicationsApi.downloadFile(id, file.id);
-      const url = URL.createObjectURL(response.data);
-      const anchor = document.createElement('a'); anchor.href = url; anchor.download = file.filename; anchor.click();
-      URL.revokeObjectURL(url);
+      downloadBlob(response.data, file.filename);
     } catch (error) { setFileError(getErrorMessage(error)); } finally { setDownloadingId(null); }
   };
 

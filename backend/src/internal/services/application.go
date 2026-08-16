@@ -21,7 +21,6 @@ const (
 	maxFileSize     = 20 * 1024 * 1024
 	maxFilesPerApp  = 10
 	maxActiveApps   = 10
-	presignedURLTTL = 15 * time.Minute
 	cancelFileTTL   = 7 * 24 * time.Hour
 	rejectedFileTTL = 7 * 24 * time.Hour
 	issuedFileTTL   = 30 * 24 * time.Hour
@@ -39,6 +38,12 @@ type ParsedFile struct {
 	Header *multipart.FileHeader
 	Data   []byte
 	Format string
+}
+
+type FileDownload struct {
+	Reader   io.ReadCloser
+	Filename string
+	Size     int
 }
 
 type ApplicationService struct {
@@ -748,7 +753,12 @@ func (s *ApplicationService) UploadFileToApp(appID, userID uuid.UUID, fh *multip
 	}, nil
 }
 
-func (s *ApplicationService) DownloadFile(appID, fileID uuid.UUID, isAdmin bool, userID uuid.UUID) (string, error) {
+func (s *ApplicationService) DownloadFile(
+	ctx context.Context,
+	appID, fileID uuid.UUID,
+	isAdmin bool,
+	userID uuid.UUID,
+) (*FileDownload, error) {
 	var app *models.Application
 	var err error
 	if isAdmin {
@@ -757,47 +767,27 @@ func (s *ApplicationService) DownloadFile(appID, fileID uuid.UUID, isAdmin bool,
 		app, err = s.appRepo.FindByIDAndUser(appID, userID)
 	}
 	if err != nil || app == nil {
-		return "", &ErrApplicationNotFound{}
+		return nil, &ErrApplicationNotFound{}
 	}
 
 	file, err := s.fileRepo.FindByID(fileID, appID)
 	if err != nil {
-		return "", fmt.Errorf("find file: %w", err)
+		return nil, fmt.Errorf("find file: %w", err)
 	}
 	if file == nil {
-		return "", &ErrFileNotFound{}
+		return nil, &ErrFileNotFound{}
 	}
 	if file.DeletedAt != nil {
-		return "", &ErrFileDeleted{DeletedAfter: *file.DeletedAt}
+		return nil, &ErrFileDeleted{DeletedAfter: *file.DeletedAt}
 	}
 
-	presigned, err := s.storageService.PresignedURL(context.Background(), file.StoragePath, presignedURLTTL)
+	reader, err := s.storageService.Open(ctx, file.StoragePath)
 	if err != nil {
-		return "", fmt.Errorf("presign url: %w", err)
+		return nil, fmt.Errorf("open stored file: %w", err)
 	}
-	return presigned.String(), nil
+	return &FileDownload{Reader: reader, Filename: file.Filename, Size: file.Size}, nil
 }
 
-func (s *ApplicationService) DownloadFileAdmin(appID, fileID uuid.UUID) (string, error) {
-	app, err := s.appRepo.FindByID(appID)
-	if err != nil || app == nil {
-		return "", &ErrApplicationNotFound{}
-	}
-
-	file, err := s.fileRepo.FindByID(fileID, appID)
-	if err != nil {
-		return "", fmt.Errorf("find file: %w", err)
-	}
-	if file == nil {
-		return "", &ErrFileNotFound{}
-	}
-	if file.DeletedAt != nil {
-		return "", &ErrFileDeleted{DeletedAfter: *file.DeletedAt}
-	}
-
-	presigned, err := s.storageService.PresignedURL(context.Background(), file.StoragePath, presignedURLTTL)
-	if err != nil {
-		return "", fmt.Errorf("presign url: %w", err)
-	}
-	return presigned.String(), nil
+func (s *ApplicationService) DownloadFileAdmin(ctx context.Context, appID, fileID uuid.UUID) (*FileDownload, error) {
+	return s.DownloadFile(ctx, appID, fileID, true, uuid.Nil)
 }

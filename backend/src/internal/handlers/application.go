@@ -3,8 +3,11 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"log/slog"
+	"mime"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -258,14 +261,14 @@ func (h *ApplicationHandler) UploadFile(w http.ResponseWriter, r *http.Request) 
 	writeJSON(w, http.StatusCreated, resp)
 }
 
-// DownloadFile перенаправляет на presigned URL файла.
+// DownloadFile потоково отдаёт файл из объектного хранилища.
 //
-//	@Summary	Скачать файл (редирект на presigned URL)
+//	@Summary	Скачать файл
 //	@Tags		applications
 //	@Security	BearerAuth
 //	@Param		id		path	string	true	"ID заявки"	format(uuid)
 //	@Param		file_id	path	string	true	"ID файла"	format(uuid)
-//	@Success	302
+//	@Success	200	{file}	binary
 //	@Failure	401	{object}	apierr.ErrorResponse
 //	@Failure	403	{object}	apierr.ErrorResponse	"Требуется согласие"
 //	@Failure	404	{object}	apierr.ErrorResponse
@@ -285,12 +288,12 @@ func (h *ApplicationHandler) DownloadFile(w http.ResponseWriter, r *http.Request
 		return
 	}
 	role := middleware.UserRoleFromCtx(r.Context())
-	url, err := h.appService.DownloadFile(appID, fileID, role == "admin", userID)
+	download, err := h.appService.DownloadFile(r.Context(), appID, fileID, role == "admin", userID)
 	if err != nil {
 		h.handleAppError(w, err)
 		return
 	}
-	http.Redirect(w, r, url, http.StatusFound)
+	h.writeDownload(w, download)
 }
 
 // Admin handlers
@@ -429,14 +432,14 @@ func (h *ApplicationHandler) AdminChangeStatus(w http.ResponseWriter, r *http.Re
 	writeJSON(w, http.StatusOK, resp)
 }
 
-// AdminDownloadFile перенаправляет на presigned URL файла заявки (admin).
+// AdminDownloadFile потоково отдаёт файл заявки (admin).
 //
 //	@Summary	Скачать файл заявки (admin)
 //	@Tags		admin-applications
 //	@Security	BearerAuth
 //	@Param		id		path	string	true	"ID заявки"	format(uuid)
 //	@Param		file_id	path	string	true	"ID файла"	format(uuid)
-//	@Success	302
+//	@Success	200	{file}	binary
 //	@Failure	401	{object}	apierr.ErrorResponse
 //	@Failure	403	{object}	apierr.ErrorResponse
 //	@Failure	404	{object}	apierr.ErrorResponse
@@ -454,12 +457,29 @@ func (h *ApplicationHandler) AdminDownloadFile(w http.ResponseWriter, r *http.Re
 		apierr.Write(w, http.StatusNotFound, "FILE_NOT_FOUND", "Файл не найден", nil)
 		return
 	}
-	url, err := h.appService.DownloadFileAdmin(appID, fileID)
+	download, err := h.appService.DownloadFileAdmin(r.Context(), appID, fileID)
 	if err != nil {
 		h.handleAppError(w, err)
 		return
 	}
-	http.Redirect(w, r, url, http.StatusFound)
+	h.writeDownload(w, download)
+}
+
+func (h *ApplicationHandler) writeDownload(w http.ResponseWriter, download *services.FileDownload) {
+	defer func() {
+		if err := download.Reader.Close(); err != nil {
+			h.logger.Warn("close downloaded file", "err", err)
+		}
+	}()
+
+	disposition := mime.FormatMediaType("attachment", map[string]string{"filename": download.Filename})
+	w.Header().Set("Content-Disposition", disposition)
+	w.Header().Set("Content-Type", "application/octet-stream")
+	w.Header().Set("Content-Length", strconv.Itoa(download.Size))
+	w.WriteHeader(http.StatusOK)
+	if _, err := io.Copy(w, download.Reader); err != nil {
+		h.logger.Error("stream downloaded file", "err", err, "filename", download.Filename)
+	}
 }
 
 func (h *ApplicationHandler) handleAppError(w http.ResponseWriter, err error) {

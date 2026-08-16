@@ -4,8 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"net/url"
-	"time"
+	"io"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -46,8 +45,18 @@ func (s *StorageService) Upload(ctx context.Context, objectPath string, data []b
 	return err
 }
 
-func (s *StorageService) PresignedURL(ctx context.Context, objectPath string, ttl time.Duration) (*url.URL, error) {
-	return s.client.PresignedGetObject(ctx, s.bucket, objectPath, ttl, nil)
+func (s *StorageService) Open(ctx context.Context, objectPath string) (io.ReadCloser, error) {
+	object, err := s.client.GetObject(ctx, s.bucket, objectPath, minio.GetObjectOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("get object: %w", err)
+	}
+	// GetObject is lazy: Stat forces the request now so API errors can still be
+	// returned before response headers are written to the client.
+	if _, err := object.Stat(); err != nil {
+		_ = object.Close()
+		return nil, fmt.Errorf("stat object: %w", err)
+	}
+	return object, nil
 }
 
 func (s *StorageService) Delete(ctx context.Context, objectPath string) error {

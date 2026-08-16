@@ -11,6 +11,17 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
   return children;
 }
 
+export function AnonymousRoute({ children }: { children: ReactNode }) {
+  const { profile, isAuthenticated, loading } = useAuth();
+  if (loading) return <LoadingState label="Проверяем сессию…" />;
+  if (!isAuthenticated) return children;
+  if (profile && !profile.consent_given) return <Navigate to="/consent" replace />;
+  if (profile && (!profile.full_name?.trim() || (!profile.telegram?.trim() && !profile.max?.trim()))) {
+    return <Navigate to="/profile" replace state={{ profileRequired: true }} />;
+  }
+  return <Navigate to="/app/applications" replace />;
+}
+
 export function ConsentGuard({ children }: { children: ReactNode }) {
   const { profile, loading } = useAuth();
   if (loading) return <LoadingState />;

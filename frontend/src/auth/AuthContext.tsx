@@ -1,4 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
+import axios from 'axios';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { authApi, profileApi } from '../api/endpoints';
 import type { Profile, VerifyOtpResponse } from '../types/api';
@@ -27,7 +28,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const establishSession = useCallback(async (response: VerifyOtpResponse) => {
     tokenStorage.set(response.access_token, response.refresh_token);
-    return refreshProfile();
+    try {
+      return await refreshProfile();
+    } catch (error) {
+      // Не оставляем частично созданную сессию, если профиль не удалось загрузить.
+      tokenStorage.clear();
+      setProfile(null);
+      throw error;
+    }
   }, [refreshProfile]);
 
   const logout = useCallback(async () => {
@@ -52,8 +60,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const current = await profileApi.get();
         if (active) setProfile(current);
-      } catch {
-        tokenStorage.clear();
+      } catch (error) {
+        // Временная ошибка сети или backend не должна разлогинивать пользователя.
+        // Токены удаляем только при окончательном отказе в авторизации.
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          tokenStorage.clear();
+        }
         if (active) setProfile(null);
       } finally {
         if (active) setLoading(false);

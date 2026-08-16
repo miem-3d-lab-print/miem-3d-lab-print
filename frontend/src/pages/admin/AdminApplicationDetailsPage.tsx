@@ -12,6 +12,7 @@ import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import type { ApplicationStatus, FileMeta } from '../../types/api';
 import { ADMIN_SETTABLE_STATUSES, POSITION_LABELS, STATUS_LABELS } from '../../utils/constants';
+import { downloadBlob } from '../../utils/download';
 import { getErrorMessage } from '../../utils/errors';
 import { formatDate, formatDateTime } from '../../utils/format';
 
@@ -39,7 +40,7 @@ export function AdminApplicationDetailsPage() {
   const download = async (file: FileMeta) => {
     setDownloadingId(file.id);
     setDownloadError('');
-    try { const response = await adminApplicationsApi.downloadFile(id, file.id); const url = URL.createObjectURL(response.data); const anchor = document.createElement('a'); anchor.href = url; anchor.download = file.filename; anchor.click(); URL.revokeObjectURL(url); } catch (error) { setDownloadError(getErrorMessage(error)); } finally { setDownloadingId(null); }
+    try { const response = await adminApplicationsApi.downloadFile(id, file.id); downloadBlob(response.data, file.filename); } catch (error) { setDownloadError(getErrorMessage(error)); } finally { setDownloadingId(null); }
   };
   if (query.isPending) return <LoadingState />;
   if (query.isError) return <ErrorState message={getErrorMessage(query.error)} onRetry={() => void query.refetch()} />;
