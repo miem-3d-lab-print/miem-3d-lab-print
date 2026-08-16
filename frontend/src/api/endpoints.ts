@@ -6,7 +6,7 @@ import type {
   ConsentResponse, CreatedApplication, FileMeta, Material, PaginatedResponse, Profile, ProfilePatch,
   RefreshResponse, RequestOtpResponse, Role, UserApplicationDetails, UserApplicationSummary, VerifyOtpResponse,
 } from '../types/api';
-import { FILE_FIELD_NAME, FILE_TRANSFER_TIMEOUT } from '../utils/constants';
+import { FILE_TRANSFER_TIMEOUT } from '../utils/constants';
 
 
 export const authApi = {
@@ -42,7 +42,7 @@ export interface CreateApplicationPayload {
   desired_date: string;
   comment?: string;
   file_url?: string;
-  files: File[];
+  pending_file_ids: string[];
 }
 
 export type UploadProgressCallback = (progress: number) => void;
@@ -69,12 +69,21 @@ export const applicationsApi = {
     body.append('desired_date', payload.desired_date);
     if (payload.comment) body.append('comment', payload.comment);
     if (payload.file_url) body.append('file_url', payload.file_url);
-    payload.files.forEach((file) => body.append(FILE_FIELD_NAME, file));
+    payload.pending_file_ids.forEach((id) => body.append('pending_file_ids[]', id));
     return (await apiClient.post<CreatedApplication>('/applications', body, {
       timeout: FILE_TRANSFER_TIMEOUT,
       onUploadProgress: reportUploadProgress(onProgress),
     })).data;
   },
+  uploadPendingFile: async (file: File, onProgress?: UploadProgressCallback) => {
+    const body = new FormData();
+    body.append('file', file);
+    return (await apiClient.post<FileMeta>('/applications/pending-files', body, {
+      timeout: FILE_TRANSFER_TIMEOUT,
+      onUploadProgress: reportUploadProgress(onProgress),
+    })).data;
+  },
+  deletePendingFile: async (id: string) => apiClient.delete(`/applications/pending-files/${id}`),
   cancel: async (id: string) => (await apiClient.patch<CancelApplicationResponse>(`/applications/${id}/cancel`)).data,
   uploadFile: async (id: string, file: File, onProgress?: UploadProgressCallback) => {
     const body = new FormData();

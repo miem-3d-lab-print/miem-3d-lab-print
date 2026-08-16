@@ -1300,6 +1300,14 @@ paths:
         in: formData
         name: file_url
         type: string
+      - collectionFormat: multi
+        description: UUID заранее загруженных файлов
+        in: formData
+        items:
+          format: uuid
+          type: string
+        name: pending_file_ids[]
+        type: array
       - description: Файлы моделей (STL / STEP / 3MF / ZIP, до 20 МБ каждый; обязательны
           без file_url)
         in: formData
@@ -1343,6 +1351,49 @@ paths:
       security:
       - BearerAuth: []
       summary: Создать заявку
+      tags:
+      - applications
+  /api/applications/pending-files:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: Файл модели
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_dto.UploadFileResponse'
+      security:
+      - BearerAuth: []
+      summary: Временно загрузить файл новой заявки
+      tags:
+      - applications
+  /api/applications/pending-files/{file_id}:
+    delete:
+      parameters:
+      - description: ID временно загруженного файла
+        format: uuid
+        in: path
+        name: file_id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Удалить временно загруженный файл
       tags:
       - applications
   /api/applications/{id}:

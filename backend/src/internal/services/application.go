@@ -26,6 +26,7 @@ const (
 	maxActiveApps   = 10
 	maxArchiveFiles = 100
 	maxArchiveSize  = 200 * 1024 * 1024
+	pendingFileTTL  = 24 * time.Hour
 	cancelFileTTL   = 7 * 24 * time.Hour
 	rejectedFileTTL = 7 * 24 * time.Hour
 	issuedFileTTL   = 30 * 24 * time.Hour
@@ -270,6 +271,7 @@ func (s *ApplicationService) Create(
 	desiredDate time.Time,
 	comment *string,
 	fileURL *string,
+	pendingFileIDs []uuid.UUID,
 	files []*multipart.FileHeader,
 ) (*dto.CreateApplicationResponse, error) {
 	title = strings.TrimSpace(title)
@@ -316,17 +318,19 @@ func (s *ApplicationService) Create(
 		if err != nil {
 			return nil, err
 		}
-	} else if fileURL == nil {
+	}
+	if len(parsedFiles)+len(pendingFileIDs) > maxFilesPerApp {
+		return nil, &ErrFilesLimitReached{}
+	}
+	if len(parsedFiles) == 0 && len(pendingFileIDs) == 0 && fileURL == nil {
 		return nil, &ErrFilesRequired{}
 	}
 
-	year := time.Now().Year()
-	number, err := s.appRepo.GenerateNumber(year)
-	if err != nil {
-		return nil, fmt.Errorf("generate number: %w", err)
-	}
+	applicationID := uuid.New()
+	number := applicationID.String()
 
 	appModel := &models.Application{
+		ID:                   applicationID,
 		Number:               number,
 		Title:                title,
 		UserID:               userID,
@@ -366,6 +370,14 @@ func (s *ApplicationService) Create(
 			return &ErrActiveLimitReached{}
 		}
 
+		pendingFiles, err := s.fileRepo.ListPendingForUpdate(tx, userID, pendingFileIDs)
+		if err != nil {
+			return fmt.Errorf("find pending files: %w", err)
+		}
+		if len(pendingFiles) != len(pendingFileIDs) {
+			return &ErrPendingFileNotFound{}
+		}
+
 		app, err = s.appRepo.Create(tx, appModel)
 		if err != nil {
 			return fmt.Errorf("create application: %w", err)
@@ -402,6 +414,21 @@ func (s *ApplicationService) Create(
 				cleanupUploads()
 				return fmt.Errorf("create file record: %w", err)
 			}
+		}
+
+		for _, pending := range pendingFiles {
+			if _, err := s.fileRepo.Create(tx, &models.File{
+				ApplicationID: app.ID,
+				Filename:      pending.Filename,
+				StoragePath:   pending.StoragePath,
+				Size:          pending.Size,
+				Format:        pending.Format,
+			}); err != nil {
+				return fmt.Errorf("attach pending file: %w", err)
+			}
+		}
+		if err := s.fileRepo.DeletePending(tx, pendingFileIDs); err != nil {
+			return fmt.Errorf("delete attached pending files: %w", err)
 		}
 		return nil
 	})
@@ -791,6 +818,86 @@ func (s *ApplicationService) AdminChangeStatus(id, adminID uuid.UUID, targetStat
 		Status:           updatedApp.Status,
 		FilesDeleteAfter: updatedApp.FilesDeleteAfter,
 	}, nil
+}
+
+func (s *ApplicationService) UploadPendingFile(ctx context.Context, userID uuid.UUID, fh *multipart.FileHeader) (*dto.UploadFileResponse, error) {
+	pendingCount, err := s.fileRepo.CountPendingByUser(userID)
+	if err != nil {
+		return nil, fmt.Errorf("count pending files: %w", err)
+	}
+	if pendingCount >= maxFilesPerApp {
+		return nil, &ErrFilesLimitReached{}
+	}
+
+	format, err := validateFile(fh)
+	if err != nil {
+		return nil, err
+	}
+
+	fileID := uuid.New()
+	ext := strings.ToLower(filepath.Ext(fh.Filename))
+	storagePath := fmt.Sprintf("pending/%s/%s%s", userID, fileID, ext)
+	if err := s.uploadFile(ctx, storagePath, fh); err != nil {
+		return nil, &ErrStorageError{}
+	}
+
+	created, err := s.fileRepo.CreatePending(&models.PendingFile{
+		ID:          fileID,
+		UserID:      userID,
+		Filename:    fh.Filename,
+		StoragePath: storagePath,
+		Size:        int(fh.Size),
+		Format:      format,
+		ExpiresAt:   time.Now().Add(pendingFileTTL),
+	})
+	if err != nil {
+		if delErr := s.storageService.Delete(context.Background(), storagePath); delErr != nil {
+			s.logger.Error("cleanup pending file after db error", "path", storagePath, "err", delErr)
+		}
+		return nil, fmt.Errorf("create pending file: %w", err)
+	}
+
+	return &dto.UploadFileResponse{
+		ID:        created.ID.String(),
+		Filename:  created.Filename,
+		Size:      created.Size,
+		Format:    created.Format,
+		CreatedAt: created.CreatedAt,
+	}, nil
+}
+
+func (s *ApplicationService) DeletePendingFile(ctx context.Context, userID, fileID uuid.UUID) error {
+	file, err := s.fileRepo.FindPendingByIDAndUser(fileID, userID)
+	if err != nil {
+		return fmt.Errorf("find pending file: %w", err)
+	}
+	if file == nil {
+		return &ErrPendingFileNotFound{}
+	}
+	if err := s.storageService.Delete(ctx, file.StoragePath); err != nil {
+		return &ErrStorageError{}
+	}
+	if err := s.fileRepo.DeletePendingByID(file.ID); err != nil {
+		return fmt.Errorf("delete pending file: %w", err)
+	}
+	return nil
+}
+
+func (s *ApplicationService) CleanupExpiredPendingFiles(ctx context.Context) {
+	files, err := s.fileRepo.ListExpiredPending(100)
+	if err != nil {
+		s.logger.Error("list expired pending files", "err", err)
+		return
+	}
+	for _, file := range files {
+		if err := s.storageService.Delete(ctx, file.StoragePath); err != nil {
+			s.logger.Error("delete expired pending object", "path", file.StoragePath, "err", err)
+			continue
+		}
+		if err := s.fileRepo.DeletePendingByID(file.ID); err != nil {
+			s.logger.Error("delete expired pending record", "file_id", file.ID, "err", err)
+		}
+	}
 }
 
 func (s *ApplicationService) UploadFileToApp(ctx context.Context, appID, userID uuid.UUID, fh *multipart.FileHeader) (*dto.UploadFileResponse, error) {

@@ -141,9 +141,10 @@ p { line-height: 1.65; }
 .chip { border: 1px solid var(--line); background: white; border-radius: 5px; padding: 8px 13px; font-size: 11px; font-weight: 700; cursor: pointer; }
 .chip--active { border-color: var(--accent); background: #fff2e8; color: var(--accent-dark); }
 .application-list { display: flex; flex-direction: column; gap: 10px; }
-.application-card { display: grid; grid-template-columns: 180px 1fr auto; align-items: center; gap: 24px; padding: 20px 22px; background: white; border: 1px solid var(--line); border-radius: 7px; text-decoration: none; transition: border .15s ease, transform .15s ease; }
+.application-card { display: grid; grid-template-columns: minmax(280px, .8fr) 1fr auto; align-items: center; gap: 24px; padding: 20px 22px; background: white; border: 1px solid var(--line); border-radius: 7px; text-decoration: none; transition: border .15s ease, transform .15s ease; }
 .application-card:hover { border-color: #cdbfb3; transform: translateY(-1px); }
 .application-card__number, .application-card__body { display: flex; flex-direction: column; gap: 5px; }
+.application-card__number strong, .table-link { overflow-wrap: anywhere; }
 .application-card__number > div { display: flex; gap: 7px; }
 .application-card__number span, .application-card__body span { font-size: 11px; color: var(--muted); }
 .application-card__body strong { font-size: 13px; }

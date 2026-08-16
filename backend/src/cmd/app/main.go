@@ -23,9 +23,6 @@ import (
 	"syscall"
 	"time"
 
-	httpSwagger "github.com/swaggo/http-swagger"
-
-	_ "github.com/miem-3d-lab-print/miem-3d-lab-print/backend/docs"
 	"github.com/miem-3d-lab-print/miem-3d-lab-print/backend/src/internal/config"
 	"github.com/miem-3d-lab-print/miem-3d-lab-print/backend/src/internal/db"
 	"github.com/miem-3d-lab-print/miem-3d-lab-print/backend/src/internal/handlers"
@@ -86,15 +83,6 @@ func run(logger *slog.Logger) error {
 	historyRepo := repository.NewGORMStatusHistoryRepository(database)
 	statsRepo := repository.NewGORMStatsRepository(database)
 
-	// Ensure application number sequences exist for current and next year so
-	// GenerateNumber never runs DDL in the request path.
-	currentYear := time.Now().Year()
-	for _, year := range []int{currentYear, currentYear + 1} {
-		if err := appRepo.EnsureYearSequence(year); err != nil {
-			return fmt.Errorf("ensure application sequence for %d: %w", year, err)
-		}
-	}
-
 	// Services
 	jwtService := services.NewJWTService(cfg.JWT.Secret)
 	emailService := services.NewEmailService(cfg.SMTP, cfg.SiteURL)
@@ -106,6 +94,19 @@ func run(logger *slog.Logger) error {
 	appService := services.NewApplicationService(
 		logger, txMgr, appRepo, fileRepo, historyRepo, userRepo, materialService, storageService, emailService,
 	)
+	go func() {
+		appService.CleanupExpiredPendingFiles(appContext)
+		ticker := time.NewTicker(time.Hour)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				appService.CleanupExpiredPendingFiles(appContext)
+			case <-appContext.Done():
+				return
+			}
+		}
+	}()
 	adminService := services.NewAdminService(logger, txMgr, userRepo)
 	statsService := services.NewStatsService(statsRepo)
 
@@ -122,6 +123,11 @@ func run(logger *slog.Logger) error {
 	materialHandler := handlers.NewMaterialHandler(materialService, logger)
 	adminHandler := handlers.NewAdminHandler(adminService, statsService, logger)
 
+	openapiYAML, err := os.ReadFile("docs/swagger.yaml")
+	if err != nil {
+		return fmt.Errorf("read OpenAPI specification: %w", err)
+	}
+
 	apiMux := http.NewServeMux()
 	apiMux.Handle("GET /api/health/live", handlers.Live())
 	apiMux.Handle("GET /api/health/ready", handlers.Ready(sqlDB))
@@ -133,11 +139,11 @@ func run(logger *slog.Logger) error {
 	materialHandler.Register(apiMux, authMW, consentMW, adminMW)
 	adminHandler.Register(apiMux, authMW, adminMW)
 
-	apiMux.Handle("/api/docs/", httpSwagger.WrapHandler)
-	apiMux.HandleFunc("GET /api/swagger", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/api/docs/", http.StatusTemporaryRedirect)
+	apiMux.HandleFunc("GET /api/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/yaml; charset=utf-8")
+		w.Header().Set("Content-Disposition", "inline; filename=openapi.yaml")
+		_, _ = w.Write(openapiYAML)
 	})
-	apiMux.Handle("/api/swagger/", httpSwagger.WrapHandler)
 
 	server := &http.Server{
 		Addr:              cfg.Server.Address,

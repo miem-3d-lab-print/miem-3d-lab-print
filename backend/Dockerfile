@@ -15,6 +15,7 @@ RUN apk add --no-cache ca-certificates \
     && adduser -S -G app app
 WORKDIR /app
 COPY --from=builder /app/server ./server
+COPY --from=builder /app/docs/swagger.yaml ./docs/swagger.yaml
 USER app
 EXPOSE 8080
 CMD ["./server"]

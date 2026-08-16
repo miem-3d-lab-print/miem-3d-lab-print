@@ -144,6 +144,10 @@ type ErrFilesRequired struct{}
 
 func (e *ErrFilesRequired) Error() string { return "FILES_REQUIRED" }
 
+type ErrPendingFileNotFound struct{}
+
+func (e *ErrPendingFileNotFound) Error() string { return "PENDING_FILE_NOT_FOUND" }
+
 type ErrInvalidApplicationTitle struct{}
 
 func (e *ErrInvalidApplicationTitle) Error() string { return "INVALID_APPLICATION_TITLE" }

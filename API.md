@@ -4,7 +4,7 @@
 
 **Аутентификация:** Bearer JWT в заголовке `Authorization: Bearer <access_token>`
 
-**OpenAPI-спецификация:** [`backend/docs/swagger.yaml`](./backend/docs/swagger.yaml) | Swagger UI: `http://localhost:3000/api/swagger` (Compose; также доступен `/api/docs/`)
+**OpenAPI-спецификация:** [`backend/docs/swagger.yaml`](./backend/docs/swagger.yaml) | HTTP: `http://localhost:3000/api/openapi.yaml`
 
 ---
 
@@ -358,6 +358,27 @@ cancelled — финальный, установлен пользователе�
 
 ---
 
+### POST /applications/pending-files
+
+Сразу загрузить выбранный файл новой заявки. Запрос `multipart/form-data`, поле `file`. В ответе возвращается UUID, который передаётся в `pending_file_ids[]` при создании заявки. Временный файл хранится 24 часа.
+
+**Response 201:**
+```json
+{
+  "id": "uuid",
+  "filename": "model.stl",
+  "size": 102400,
+  "format": "STL",
+  "created_at": "2026-08-16T10:00:00Z"
+}
+```
+
+### DELETE /applications/pending-files/{file_id}
+
+Удалить ранее загруженный временный файл, например когда пользователь убрал его из формы. Успешный ответ: `204 No Content`.
+
+---
+
 ### POST /applications
 
 Создать заявку. Запрос в формате `multipart/form-data`.
@@ -377,13 +398,14 @@ cancelled — финальный, установлен пользователе�
 | `desired_date` | date (`YYYY-MM-DD`) | да | Желаемая дата (не в прошлом) |
 | `comment` | string | нет | Комментарий |
 | `file_url` | URL | если нет `files[]` | HTTP(S)-ссылка на файл или архив, до 2048 символов |
-| `files[]` | binary (multiple) | если нет `file_url` | STL/STEP/3MF/ZIP, до 20 МБ каждый |
+| `pending_file_ids[]` | UUID (multiple) | если нет `file_url` | Идентификаторы файлов, заранее загруженных через `POST /applications/pending-files` |
+| `files[]` | binary (multiple) | нет | Совместимый прежний способ загрузки; STL/STEP/3MF/ZIP, до 20 МБ каждый |
 
 **Response 201:**
 ```json
 {
   "id": "uuid",
-  "number": "2026-0001",
+  "number": "9b31c1ad-4912-4ced-b2d1-9f673ee4d719",
   "title": "Корпус датчика",
   "status": "new",
   "created_at": "2026-07-13T10:00:00Z"
@@ -395,6 +417,7 @@ cancelled — финальный, установлен пользователе�
 | `PROFILE_NOT_FOUND` | 404 | Профиль не существует |
 | `INVALID_APPLICATION_TITLE` | 422 | Название пустое или длиннее 255 символов |
 | `INVALID_FILE_URL` | 422 | Ссылка не использует HTTP(S) или некорректна |
+| `PENDING_FILE_NOT_FOUND` | 404 | Временный файл не найден, принадлежит другому пользователю или истёк |
 | `PROFILE_INCOMPLETE` | 409 | Не заполнен `full_name` или не указан ни один контакт |
 | `ACTIVE_LIMIT_REACHED` | 409 | Достигнут лимит в 10 активных заявок |
 | `DESIRED_DATE_IN_PAST` | 400 | Желаемая дата в прошлом |

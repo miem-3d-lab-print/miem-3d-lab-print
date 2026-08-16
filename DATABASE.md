@@ -205,7 +205,7 @@ Refresh-токены с поддержкой rotation и обнаружения 
 | Колонка | Тип | Nullable | По умолчанию | Описание |
 |---------|-----|----------|-------------|---------|
 | `id` | UUID | NOT NULL | `gen_random_uuid()` | PK |
-| `number` | VARCHAR(12) | NOT NULL | — | Уникальный номер `YYYY-NNNN` |
+| `number` | VARCHAR(36) | NOT NULL | — | Публичный номер, равный UUID заявки |
 | `title` | VARCHAR(255) | NOT NULL | `'Заявка на 3D-печать'` | Название заявки |
 | `user_id` | UUID | NOT NULL | — | FK → `users.id` RESTRICT DELETE |
 | `snapshot_full_name` | VARCHAR(255) | NOT NULL | — | ФИО заявителя на момент подачи |
@@ -232,7 +232,24 @@ Refresh-токены с поддержкой rotation и обнаружения 
 
 **Snapshot-поля** (`snapshot_*`) — неизменяемые снимки данных на момент подачи заявки. Изменение материала, цвета или профиля пользователя после подачи не влияет на историю.
 
-**Нумерация:** используется PostgreSQL-последовательность `app_number_{year}` (создаётся при старте приложения для текущего и следующего года).
+**Нумерация:** публичный номер совпадает с UUID заявки и не требует отдельных PostgreSQL-последовательностей.
+
+---
+
+### pending_files
+
+Временно загруженные файлы ещё не отправленной заявки. Запись принадлежит пользователю, содержит путь MinIO и срок действия `expires_at`. При создании заявки файл переносится логически в `files`, а временная запись удаляется. Неиспользованные файлы очищаются фоновым процессом после 24 часов.
+
+| Колонка | Тип | Nullable | Описание |
+|---------|-----|----------|----------|
+| `id` | UUID | NOT NULL | PK и идентификатор для `pending_file_ids[]` |
+| `user_id` | UUID | NOT NULL | FK → `users.id` CASCADE DELETE |
+| `filename` | VARCHAR(255) | NOT NULL | Исходное имя |
+| `storage_path` | TEXT | NOT NULL | Уникальный путь в MinIO |
+| `size` | INTEGER | NOT NULL | Размер файла |
+| `format` | `file_format` | NOT NULL | STL / STEP / 3MF / ZIP |
+| `expires_at` | TIMESTAMPTZ | NOT NULL | Срок временного хранения |
+| `created_at` | TIMESTAMPTZ | NOT NULL | Время загрузки |
 
 ---
 

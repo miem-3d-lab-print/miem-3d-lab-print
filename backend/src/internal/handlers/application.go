@@ -58,6 +58,8 @@ func (h *ApplicationHandler) Register(
 
 	mux.Handle("GET /api/applications", ac(http.HandlerFunc(h.List)))
 	mux.Handle("POST /api/applications", ac(http.HandlerFunc(h.Create)))
+	mux.Handle("POST /api/applications/pending-files", ac(http.HandlerFunc(h.UploadPendingFile)))
+	mux.Handle("DELETE /api/applications/pending-files/{file_id}", ac(http.HandlerFunc(h.DeletePendingFile)))
 	mux.Handle("GET /api/applications/{id}", ac(http.HandlerFunc(h.Get)))
 	mux.Handle("PATCH /api/applications/{id}/cancel", ac(http.HandlerFunc(h.Cancel)))
 	mux.Handle("POST /api/applications/{id}/files", ac(http.HandlerFunc(h.UploadFile)))
@@ -113,6 +115,7 @@ func (h *ApplicationHandler) List(w http.ResponseWriter, r *http.Request) {
 //	@Param		desired_date	formData	string	true	"Желаемая дата получения (YYYY-MM-DD)"
 //	@Param		comment			formData	string	false	"Комментарий"
 //	@Param		file_url		formData	string	false	"HTTP(S)-ссылка на файл (альтернатива загрузке)"
+//	@Param		pending_file_ids[]	formData	[]string	false	"UUID заранее загруженных файлов"
 //	@Param		files[]			formData	file	false	"Файлы моделей (STL / STEP / 3MF / ZIP, до 20 МБ каждый; обязательны без file_url)"
 //	@Success	201	{object}	dto.CreateApplicationResponse
 //	@Failure	400	{object}	apierr.ErrorResponse
@@ -180,13 +183,68 @@ func (h *ApplicationHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	files := r.MultipartForm.File["files[]"]
+	pendingFileIDs := make([]uuid.UUID, 0, len(r.MultipartForm.Value["pending_file_ids[]"]))
+	seenPendingFileIDs := make(map[uuid.UUID]struct{})
+	for _, rawID := range r.MultipartForm.Value["pending_file_ids[]"] {
+		fileID, err := uuid.Parse(rawID)
+		if err != nil {
+			apierr.Write(w, http.StatusUnprocessableEntity, "VALIDATION_ERROR", "Некорректный pending_file_ids[]", nil)
+			return
+		}
+		if _, exists := seenPendingFileIDs[fileID]; exists {
+			continue
+		}
+		seenPendingFileIDs[fileID] = struct{}{}
+		pendingFileIDs = append(pendingFileIDs, fileID)
+	}
 
-	resp, err := h.appService.Create(r.Context(), userID, title, position, purpose, materialID, colorMatters, colorID, desiredDate, comment, fileURL, files)
+	resp, err := h.appService.Create(r.Context(), userID, title, position, purpose, materialID, colorMatters, colorID, desiredDate, comment, fileURL, pendingFileIDs, files)
 	if err != nil {
 		h.handleAppError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, resp)
+}
+
+// UploadPendingFile загружает файл сразу после его выбора до создания заявки.
+//
+//	@Summary	Временно загрузить файл новой заявки
+//	@Tags		applications
+//	@Accept		mpfd
+//	@Produce	json
+//	@Security	BearerAuth
+//	@Param		file	formData	file	true	"Файл модели"
+//	@Success	201	{object}	dto.UploadFileResponse
+//	@Router		/api/applications/pending-files [post]
+func (h *ApplicationHandler) UploadPendingFile(w http.ResponseWriter, r *http.Request) {
+	if !parseMultipart(w, r, fileRequestSizeLimit) {
+		return
+	}
+	defer r.MultipartForm.RemoveAll()
+	files := r.MultipartForm.File["file"]
+	if len(files) == 0 {
+		apierr.Write(w, http.StatusBadRequest, "FILES_REQUIRED", "Файл не передан", nil)
+		return
+	}
+	resp, err := h.appService.UploadPendingFile(r.Context(), middleware.UserIDFromCtx(r.Context()), files[0])
+	if err != nil {
+		h.handleAppError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, resp)
+}
+
+func (h *ApplicationHandler) DeletePendingFile(w http.ResponseWriter, r *http.Request) {
+	fileID, err := uuid.Parse(r.PathValue("file_id"))
+	if err != nil {
+		apierr.Write(w, http.StatusNotFound, "PENDING_FILE_NOT_FOUND", "Временно загруженный файл не найден", nil)
+		return
+	}
+	if err := h.appService.DeletePendingFile(r.Context(), middleware.UserIDFromCtx(r.Context()), fileID); err != nil {
+		h.handleAppError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // Get возвращает детали заявки текущего пользователя.
@@ -539,6 +597,7 @@ func (h *ApplicationHandler) handleAppError(w http.ResponseWriter, err error) {
 	var eFilesLimit *services.ErrFilesLimitReached
 	var eTitle *services.ErrInvalidApplicationTitle
 	var eFileURL *services.ErrInvalidFileURL
+	var ePendingFile *services.ErrPendingFileNotFound
 
 	switch {
 	case errors.As(err, &eNotFound):
@@ -555,6 +614,8 @@ func (h *ApplicationHandler) handleAppError(w http.ResponseWriter, err error) {
 		apierr.Write(w, http.StatusUnprocessableEntity, "INVALID_APPLICATION_TITLE", "Укажите название заявки длиной до 255 символов", nil)
 	case errors.As(err, &eFileURL):
 		apierr.Write(w, http.StatusUnprocessableEntity, "INVALID_FILE_URL", "Укажите корректную HTTP(S)-ссылку на файл", nil)
+	case errors.As(err, &ePendingFile):
+		apierr.Write(w, http.StatusNotFound, "PENDING_FILE_NOT_FOUND", "Временно загруженный файл не найден или срок его хранения истёк", nil)
 	case errors.As(err, &eFormat):
 		apierr.Write(w, http.StatusBadRequest, "INVALID_FILE_FORMAT",
 			"Недопустимый формат файла (ожидается STL, STEP, 3MF или ZIP с моделями)",

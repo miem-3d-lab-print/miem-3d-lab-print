@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -21,8 +20,6 @@ type ApplicationRepository interface {
 	CountActive(tx DBTX, userID uuid.UUID) (int, error)
 	CancelAtomic(tx DBTX, id, userID uuid.UUID, filesDeleteAfter time.Time) (*models.Application, error)
 	UpdateStatus(tx DBTX, id uuid.UUID, status string, rejectionReason *string, filesDeleteAfter *time.Time) (*models.Application, error)
-	GenerateNumber(year int) (string, error)
-	EnsureYearSequence(year int) error
 }
 
 type GORMApplicationRepository struct {
@@ -33,22 +30,10 @@ func NewGORMApplicationRepository(database *gorm.DB) *GORMApplicationRepository 
 	return &GORMApplicationRepository{db: database}
 }
 
-func (repository *GORMApplicationRepository) EnsureYearSequence(year int) error {
-	sequence := fmt.Sprintf("app_number_%d", year)
-	return repository.db.Exec(fmt.Sprintf("CREATE SEQUENCE IF NOT EXISTS %s", sequence)).Error
-}
-
-func (repository *GORMApplicationRepository) GenerateNumber(year int) (string, error) {
-	sequence := fmt.Sprintf("app_number_%d", year)
-	var value int64
-	if err := repository.db.Raw(fmt.Sprintf("SELECT nextval('%s')", sequence)).Scan(&value).Error; err != nil {
-		return "", err
-	}
-	return fmt.Sprintf("%d-%04d", year, value), nil
-}
-
 func (repository *GORMApplicationRepository) Create(tx DBTX, application *models.Application) (*models.Application, error) {
-	application.ID = uuid.New()
+	if application.ID == uuid.Nil {
+		application.ID = uuid.New()
+	}
 	application.Status = "new"
 	application.DeadlineNotified = false
 	if err := tx.Create(application).Error; err != nil {

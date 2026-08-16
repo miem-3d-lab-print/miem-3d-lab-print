@@ -41,6 +41,17 @@ type File struct {
 	CreatedAt     time.Time
 }
 
+type PendingFile struct {
+	ID          uuid.UUID
+	UserID      uuid.UUID
+	Filename    string
+	StoragePath string
+	Size        int
+	Format      string
+	ExpiresAt   time.Time
+	CreatedAt   time.Time
+}
+
 type StatusHistory struct {
 	ID            uuid.UUID
 	ApplicationID uuid.UUID

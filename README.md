@@ -21,7 +21,7 @@ docker compose up --build -d
 | Приложение | <http://localhost:3000> |
 | Проверка готовности | <http://localhost:3000/api/health> |
 | Liveness | <http://localhost:3000/api/health/live> |
-| Swagger UI | <http://localhost:3000/api/swagger> (также `/api/docs/`) |
+| OpenAPI YAML | <http://localhost:3000/api/openapi.yaml> |
 
 Основной Compose публикует только TCP-порт `3000`. PostgreSQL, MinIO, Mailpit и backend доступны только контейнерам во внутренней Docker-сети. Для входа укажите адрес в домене `hse.ru`, `edu.hse.ru` или `miem.hse.ru`; при локальном запуске OTP отправляется во внутренний Mailpit.
 
@@ -216,13 +216,13 @@ miem-3d-lab-print/
 - React 19, TypeScript, Vite, TanStack Query, SCSS, Vitest, Testing Library, ESLint, Stylelint и Prettier;
 - Docker Compose, nginx и GitHub Actions.
 
-Nginx — единственная публичная точка входа: он принимает запросы на порту `3000`, раздает SPA, ограничивает частоту OTP/API-запросов и проксирует `/api` в backend. Загруженные 3D-модели хранятся в MinIO, метаданные и история статусов — в PostgreSQL. GORM применяется для CRUD, фильтров и транзакций; PostgreSQL-specific аналитика и sequences используют raw SQL через GORM.
+Nginx — единственная публичная точка входа: он принимает запросы на порту `3000`, раздает SPA, ограничивает частоту OTP/API-запросов и проксирует `/api` в backend. Загруженные 3D-модели хранятся в MinIO, метаданные и история статусов — в PostgreSQL. GORM применяется для CRUD, фильтров и транзакций.
 
 ## Документация
 
 - [API.md](./API.md) — эндпоинты, форматы запросов, ошибки и правила перехода статусов.
 - [DATABASE.md](./DATABASE.md) — таблицы, связи, индексы и ограничения.
-- Swagger UI — `/api/swagger` у запущенного приложения (прямой адрес: `/api/docs/`).
+- OpenAPI YAML — `/api/openapi.yaml` у запущенного приложения.
 - [frontend/README.md](./frontend/README.md) — детали frontend-разработки.
 
 ## Лицензия
