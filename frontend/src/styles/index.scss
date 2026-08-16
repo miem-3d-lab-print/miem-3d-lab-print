@@ -99,9 +99,6 @@ p { line-height: 1.65; }
 .contact-band { margin: 0 clamp(20px, 5vw, 64px) 60px; padding: 36px; border-radius: 8px; background: #f4e7dc; display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; }
 .contact-band h2 { margin: 8px 0; }
 .contact-band p { margin: 2px 0; font-size: 13px; color: #635b55; }
-.contact-checks { display: flex; flex-direction: column; gap: 8px; min-width: 240px; }
-.contact-checks span { display: flex; gap: 8px; align-items: center; font-size: 12px; font-weight: 600; }
-.contact-checks svg { color: var(--success); }
 
 .page { width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 44px 0 72px; }
 .page--narrow { width: min(720px, calc(100% - 40px)); }
@@ -318,7 +315,6 @@ p { line-height: 1.65; }
   .hero-image { min-height: 260px; }
   .steps-grid, .materials-grid, .stats-cards, .selection-grid, .two-columns { grid-template-columns: 1fr; }
   .contact-band, .page-heading--actions, .danger-zone, .catalog-admin-card__header, .stats-filter { flex-direction: column; align-items: stretch; }
-  .contact-checks { min-width: 0; }
   .page { width: min(100% - 24px, 1180px); padding-top: 30px; }
   .application-card { grid-template-columns: 1fr; gap: 12px; }
   .application-card .status-badge { justify-self: start; }

@@ -4,7 +4,7 @@
 
 **Аутентификация:** Bearer JWT в заголовке `Authorization: Bearer <access_token>`
 
-**OpenAPI-спецификация:** [`backend/docs/swagger.yaml`](./backend/docs/swagger.yaml) | HTTP: `http://localhost:3000/api/openapi.yaml`
+**OpenAPI-спецификация:** [`backend/docs/swagger.yaml`](./backend/docs/swagger.yaml) | HTTP: `http://localhost:3000/swagger`
 
 ---
 
@@ -91,7 +91,7 @@
 **Файлы при создании:**
 - Форматы: STL, STEP, 3MF, ZIP. Проверяется по расширению и сигнатуре байт.
 - ZIP должен быть корректным архивом и содержать хотя бы одну валидную STL/STEP/STP/3MF-модель. До 100 элементов и до 200 МБ суммарного распакованного размера.
-- Максимальный размер одного файла: **20 МБ**.
+- Максимальный размер одного файла: **100 МБ**.
 - Лимит файлов на заявку: **10 файлов** (суммарно, включая загруженные позже).
 
 **Загрузка дополнительных файлов (`POST /applications/{id}/files`):**
@@ -397,9 +397,8 @@ cancelled — финальный, установлен пользователе�
 | `color_id` | UUID | если `color_matters=true` | ID активного цвета |
 | `desired_date` | date (`YYYY-MM-DD`) | да | Желаемая дата (не в прошлом) |
 | `comment` | string | нет | Комментарий |
-| `file_url` | URL | если нет `files[]` | HTTP(S)-ссылка на файл или архив, до 2048 символов |
+| `file_url` | URL | если нет `pending_file_ids[]` | HTTP(S)-ссылка на файл или архив, до 2048 символов |
 | `pending_file_ids[]` | UUID (multiple) | если нет `file_url` | Идентификаторы файлов, заранее загруженных через `POST /applications/pending-files` |
-| `files[]` | binary (multiple) | нет | Совместимый прежний способ загрузки; STL/STEP/3MF/ZIP, до 20 МБ каждый |
 
 **Response 201:**
 ```json
@@ -427,7 +426,7 @@ cancelled — финальный, установлен пользователе�
 | `COLOR_NOT_FOUND` | 404 | Цвет не найден |
 | `COLOR_NOT_AVAILABLE` | 409 | Цвет деактивирован |
 | `INVALID_FILE_FORMAT` | 400 | Формат файла не STL/STEP/3MF/ZIP или ZIP не прошёл проверку |
-| `FILE_TOO_LARGE` | 413 | Файл превышает 20 МБ |
+| `FILE_TOO_LARGE` | 413 | Файл превышает 100 МБ |
 
 ---
 
@@ -503,7 +502,7 @@ cancelled — финальный, установлен пользователе�
 
 | Поле | Описание |
 |------|---------|
-| `file` | Один файл STL/STEP/3MF/ZIP, до 20 МБ |
+| `file` | Один файл STL/STEP/3MF/ZIP, до 100 МБ |
 
 **Response 201:**
 ```json
@@ -521,7 +520,7 @@ cancelled — финальный, установлен пользователе�
 | `APPLICATION_NOT_FOUND` | 404 | Заявка не найдена |
 | `FILES_REQUIRED` | 400 | Файл не передан |
 | `INVALID_FILE_FORMAT` | 400 | Формат не поддерживается |
-| `FILE_TOO_LARGE` | 413 | Файл > 20 МБ |
+| `FILE_TOO_LARGE` | 413 | Файл > 100 МБ |
 | `FILES_LOCKED` | 409 | Заявка не в статусе `new`; `details.current_status` |
 | `FILES_LIMIT_REACHED` | 409 | Достигнут лимит в 10 файлов на заявку |
 
@@ -658,6 +657,19 @@ cancelled — финальный, установлен пользователе�
 ```
 
 `material.is_active_now` — актуальный статус материала на момент запроса (не snapshot).
+
+---
+
+### DELETE /admin/applications/{id}
+
+Полностью удалить заявку. Доступно только администратору. Backend сначала удаляет все загруженные объекты заявки из MinIO, затем удаляет заявку, файлы и историю статусов из PostgreSQL.
+
+Успешный ответ: `204 No Content`.
+
+| Код | HTTP | Условие |
+|-----|------|---------|
+| `APPLICATION_NOT_FOUND` | 404 | Заявка не найдена |
+| `STORAGE_ERROR` | 502 | Не удалось удалить один из файлов из MinIO; запись заявки сохраняется |
 
 ---
 
@@ -996,7 +1008,7 @@ cancelled — финальный, установлен пользователе�
 | `COLOR_NOT_FOUND` | 404 | Цвет не найден |
 | `COLOR_NOT_AVAILABLE` | 409 | Цвет деактивирован |
 | `COLOR_NAME_EXISTS` | 409 | Цвет с таким именем уже существует |
-| `FILE_TOO_LARGE` | 413 | Файл превышает 20 МБ |
+| `FILE_TOO_LARGE` | 413 | Файл превышает 100 МБ |
 | `INVALID_FILE_FORMAT` | 400 | Неверный формат файла (не STL/STEP/3MF/ZIP) |
 | `FILES_REQUIRED` | 400 | Файл не передан |
 | `FILES_LOCKED` | 409 | Загрузка файлов недоступна (статус не `new`) |

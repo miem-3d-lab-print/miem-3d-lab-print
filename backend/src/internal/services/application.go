@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	maxFileSize     = 20 * 1024 * 1024
+	maxFileSize     = 100 * 1024 * 1024
 	maxFilesPerApp  = 10
 	maxActiveApps   = 10
 	maxArchiveFiles = 100
@@ -272,7 +272,6 @@ func (s *ApplicationService) Create(
 	comment *string,
 	fileURL *string,
 	pendingFileIDs []uuid.UUID,
-	files []*multipart.FileHeader,
 ) (*dto.CreateApplicationResponse, error) {
 	title = strings.TrimSpace(title)
 	if title == "" || len([]rune(title)) > 255 || strings.ContainsAny(title, "\r\n") {
@@ -312,17 +311,10 @@ func (s *ApplicationService) Create(
 		return nil, err
 	}
 
-	var parsedFiles []ParsedFile
-	if len(files) > 0 {
-		parsedFiles, err = s.validateFiles(files)
-		if err != nil {
-			return nil, err
-		}
-	}
-	if len(parsedFiles)+len(pendingFileIDs) > maxFilesPerApp {
+	if len(pendingFileIDs) > maxFilesPerApp {
 		return nil, &ErrFilesLimitReached{}
 	}
-	if len(parsedFiles) == 0 && len(pendingFileIDs) == 0 && fileURL == nil {
+	if len(pendingFileIDs) == 0 && fileURL == nil {
 		return nil, &ErrFilesRequired{}
 	}
 
@@ -348,16 +340,6 @@ func (s *ApplicationService) Create(
 	}
 	if colorMatters && colorID != nil {
 		appModel.ColorID = colorID
-	}
-
-	// Track paths of files uploaded to MinIO so we can clean up on any failure.
-	uploadedPaths := make([]string, 0, len(parsedFiles))
-	cleanupUploads := func() {
-		for _, p := range uploadedPaths {
-			if delErr := s.storageService.Delete(context.Background(), p); delErr != nil {
-				s.logger.Error("cleanup orphan file", "path", p, "err", delErr)
-			}
-		}
 	}
 
 	var app *models.Application
@@ -392,30 +374,6 @@ func (s *ApplicationService) Create(
 			return fmt.Errorf("create status history: %w", err)
 		}
 
-		for _, pf := range parsedFiles {
-			fileID := uuid.New()
-			ext := strings.ToLower(filepath.Ext(pf.Header.Filename))
-			storagePath := fmt.Sprintf("applications/%s/%s%s", app.ID, fileID, ext)
-
-			if err := s.uploadFile(ctx, storagePath, pf.Header); err != nil {
-				cleanupUploads()
-				s.logger.Error("minio upload failed", "err", err)
-				return &ErrStorageError{}
-			}
-			uploadedPaths = append(uploadedPaths, storagePath)
-
-			if _, err := s.fileRepo.Create(tx, &models.File{
-				ApplicationID: app.ID,
-				Filename:      pf.Header.Filename,
-				StoragePath:   storagePath,
-				Size:          int(pf.Header.Size),
-				Format:        pf.Format,
-			}); err != nil {
-				cleanupUploads()
-				return fmt.Errorf("create file record: %w", err)
-			}
-		}
-
 		for _, pending := range pendingFiles {
 			if _, err := s.fileRepo.Create(tx, &models.File{
 				ApplicationID: app.ID,
@@ -434,8 +392,6 @@ func (s *ApplicationService) Create(
 	})
 
 	if txErr != nil {
-		// Clean up any files that were uploaded before the tx commit failed.
-		cleanupUploads()
 		return nil, txErr
 	}
 
@@ -736,6 +692,34 @@ func (s *ApplicationService) AdminGetByID(id uuid.UUID) (*dto.ApplicationDetailA
 		detail.Color = &dto.ColorRef{ID: app.ColorID.String(), SnapshotName: *app.SnapshotColorName}
 	}
 	return detail, nil
+}
+
+func (s *ApplicationService) AdminDelete(ctx context.Context, id uuid.UUID) error {
+	app, err := s.appRepo.FindByID(id)
+	if err != nil {
+		return fmt.Errorf("find application for delete: %w", err)
+	}
+	if app == nil {
+		return &ErrApplicationNotFound{}
+	}
+
+	files, err := s.fileRepo.ListByApplication(id)
+	if err != nil {
+		return fmt.Errorf("list application files for delete: %w", err)
+	}
+	for _, file := range files {
+		if err := s.storageService.Delete(ctx, file.StoragePath); err != nil {
+			s.logger.Error("delete application object", "application_id", id, "path", file.StoragePath, "err", err)
+			return &ErrStorageError{}
+		}
+	}
+
+	if err := s.txMgr.RunInTx(ctx, func(tx repository.DBTX) error {
+		return s.appRepo.Delete(tx, id)
+	}); err != nil {
+		return fmt.Errorf("delete application: %w", err)
+	}
+	return nil
 }
 
 func (s *ApplicationService) AdminChangeStatus(id, adminID uuid.UUID, targetStatus string, comment, rejectionReason *string) (*dto.ChangeStatusResponse, error) {

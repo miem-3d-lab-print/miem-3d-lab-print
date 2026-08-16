@@ -100,7 +100,6 @@ services:
       context: ./frontend
       args:
         VITE_API_URL: /api
-        VITE_FILES_FIELD_NAME: "files[]"
     restart: unless-stopped
     depends_on:
       backend:

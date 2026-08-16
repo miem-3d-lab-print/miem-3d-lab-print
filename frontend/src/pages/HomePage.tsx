@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, Check, FileUp, Layers3, PackageCheck, Printer } from 'lucide-react';
+import { ArrowRight, FileUp, Layers3, PackageCheck, Printer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { materialsApi } from '../api/endpoints';
 import { useAuth } from '../auth/AuthContext';
@@ -66,7 +66,6 @@ export function HomePage() {
 
       <section className="contact-band">
         <div><span className="eyebrow">КОНТАКТЫ</span><h2>Лаборатория 3D-визуализации</h2><p>Таллинская ул., 34, аудитория 211 · руководитель — Коваленко А. А.</p><p>aakovalenko@hse.ru · 8-495-772-95-90, доб. 15189/15863</p></div>
-        <div className="contact-checks"><span><Check size={18} /> Корпоративная авторизация</span><span><Check size={18} /> История статусов</span><span><Check size={18} /> Файлы до 20 МБ</span></div>
       </section>
     </>
   );

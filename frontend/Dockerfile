@@ -8,9 +8,7 @@ RUN npm install --no-audit --no-fund
 COPY . .
 
 ARG VITE_API_URL=/api
-ARG VITE_FILES_FIELD_NAME=files[]
 ENV VITE_API_URL=$VITE_API_URL
-ENV VITE_FILES_FIELD_NAME=$VITE_FILES_FIELD_NAME
 RUN npm run build
 
 FROM nginx:1.29-alpine

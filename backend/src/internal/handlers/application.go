@@ -26,8 +26,8 @@ type ApplicationHandler struct {
 
 const (
 	multipartMemoryLimit   = 8 << 20
-	createRequestSizeLimit = 210 << 20
-	fileRequestSizeLimit   = 22 << 20
+	createRequestSizeLimit = 2 << 20
+	fileRequestSizeLimit   = 102 << 20
 )
 
 func NewApplicationHandler(appService *services.ApplicationService, logger *slog.Logger) *ApplicationHandler {
@@ -67,6 +67,7 @@ func (h *ApplicationHandler) Register(
 
 	mux.Handle("GET /api/admin/applications", authMW(adminMW(http.HandlerFunc(h.AdminList))))
 	mux.Handle("GET /api/admin/applications/{id}", authMW(adminMW(http.HandlerFunc(h.AdminGet))))
+	mux.Handle("DELETE /api/admin/applications/{id}", authMW(adminMW(http.HandlerFunc(h.AdminDelete))))
 	mux.Handle("PATCH /api/admin/applications/{id}/status", authMW(adminMW(http.HandlerFunc(h.AdminChangeStatus))))
 	mux.Handle("GET /api/admin/applications/{id}/files/{file_id}", authMW(adminMW(http.HandlerFunc(h.AdminDownloadFile))))
 }
@@ -116,7 +117,6 @@ func (h *ApplicationHandler) List(w http.ResponseWriter, r *http.Request) {
 //	@Param		comment			formData	string	false	"Комментарий"
 //	@Param		file_url		formData	string	false	"HTTP(S)-ссылка на файл (альтернатива загрузке)"
 //	@Param		pending_file_ids[]	formData	[]string	false	"UUID заранее загруженных файлов"
-//	@Param		files[]			formData	file	false	"Файлы моделей (STL / STEP / 3MF / ZIP, до 20 МБ каждый; обязательны без file_url)"
 //	@Success	201	{object}	dto.CreateApplicationResponse
 //	@Failure	400	{object}	apierr.ErrorResponse
 //	@Failure	401	{object}	apierr.ErrorResponse
@@ -182,7 +182,6 @@ func (h *ApplicationHandler) Create(w http.ResponseWriter, r *http.Request) {
 		fileURL = &fileURLStr
 	}
 
-	files := r.MultipartForm.File["files[]"]
 	pendingFileIDs := make([]uuid.UUID, 0, len(r.MultipartForm.Value["pending_file_ids[]"]))
 	seenPendingFileIDs := make(map[uuid.UUID]struct{})
 	for _, rawID := range r.MultipartForm.Value["pending_file_ids[]"] {
@@ -198,7 +197,7 @@ func (h *ApplicationHandler) Create(w http.ResponseWriter, r *http.Request) {
 		pendingFileIDs = append(pendingFileIDs, fileID)
 	}
 
-	resp, err := h.appService.Create(r.Context(), userID, title, position, purpose, materialID, colorMatters, colorID, desiredDate, comment, fileURL, pendingFileIDs, files)
+	resp, err := h.appService.Create(r.Context(), userID, title, position, purpose, materialID, colorMatters, colorID, desiredDate, comment, fileURL, pendingFileIDs)
 	if err != nil {
 		h.handleAppError(w, err)
 		return
@@ -213,7 +212,7 @@ func (h *ApplicationHandler) Create(w http.ResponseWriter, r *http.Request) {
 //	@Accept		mpfd
 //	@Produce	json
 //	@Security	BearerAuth
-//	@Param		file	formData	file	true	"Файл модели"
+//	@Param		file	formData	file	true	"Файл модели (STL / STEP / 3MF / ZIP, до 100 МБ)"
 //	@Success	201	{object}	dto.UploadFileResponse
 //	@Router		/api/applications/pending-files [post]
 func (h *ApplicationHandler) UploadPendingFile(w http.ResponseWriter, r *http.Request) {
@@ -312,7 +311,7 @@ func (h *ApplicationHandler) Cancel(w http.ResponseWriter, r *http.Request) {
 //	@Produce	json
 //	@Security	BearerAuth
 //	@Param		id		path		string	true	"ID заявки"	format(uuid)
-//	@Param		file	formData	file	true	"Файл модели (STL / STEP / 3MF / ZIP, до 20 МБ)"
+//	@Param		file	formData	file	true	"Файл модели (STL / STEP / 3MF / ZIP, до 100 МБ)"
 //	@Success	201	{object}	dto.UploadFileResponse
 //	@Failure	400	{object}	apierr.ErrorResponse	"Файл не передан или неверный формат"
 //	@Failure	401	{object}	apierr.ErrorResponse
@@ -482,6 +481,29 @@ func (h *ApplicationHandler) AdminGet(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, resp)
 }
 
+// AdminDelete полностью удаляет заявку, её историю и файлы из объектного хранилища.
+//
+//	@Summary	Полностью удалить заявку (admin)
+//	@Tags		admin-applications
+//	@Security	BearerAuth
+//	@Param		id	path	string	true	"ID заявки"	format(uuid)
+//	@Success	204
+//	@Failure	404	{object}	apierr.ErrorResponse
+//	@Failure	502	{object}	apierr.ErrorResponse
+//	@Router		/api/admin/applications/{id} [delete]
+func (h *ApplicationHandler) AdminDelete(w http.ResponseWriter, r *http.Request) {
+	id, err := uuid.Parse(r.PathValue("id"))
+	if err != nil {
+		apierr.Write(w, http.StatusNotFound, "APPLICATION_NOT_FOUND", "Заявка не найдена", nil)
+		return
+	}
+	if err := h.appService.AdminDelete(r.Context(), id); err != nil {
+		h.handleAppError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 // AdminChangeStatus изменяет статус заявки.
 //
 //	@Summary	Изменить статус заявки (admin)
@@ -623,7 +645,7 @@ func (h *ApplicationHandler) handleAppError(w http.ResponseWriter, err error) {
 	case errors.As(err, &eTooLarge):
 		apierr.Write(w, http.StatusRequestEntityTooLarge, "FILE_TOO_LARGE",
 			"Файл превышает допустимый размер",
-			map[string]any{"filename": eTooLarge.Filename, "max_size_mb": 20})
+			map[string]any{"filename": eTooLarge.Filename, "max_size_mb": 100})
 	case errors.As(err, &eStorage):
 		apierr.Write(w, http.StatusBadGateway, "STORAGE_ERROR", "Хранилище файлов недоступно", nil)
 	case errors.As(err, &eProfile):

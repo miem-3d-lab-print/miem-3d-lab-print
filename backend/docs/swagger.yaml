@@ -649,6 +649,30 @@ paths:
       tags:
       - admin-applications
   /api/admin/applications/{id}:
+    delete:
+      parameters:
+      - description: ID заявки
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse'
+        "502":
+          description: Object storage error
+          schema:
+            $ref: '#/definitions/github_com_miem-3d-lab-print_miem-3d-lab-print_backend_src_internal_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Полностью удалить заявку (admin)
+      tags:
+      - admin-applications
     get:
       parameters:
       - description: ID заявки
@@ -1308,11 +1332,6 @@ paths:
           type: string
         name: pending_file_ids[]
         type: array
-      - description: Файлы моделей (STL / STEP / 3MF / ZIP, до 20 МБ каждый; обязательны
-          без file_url)
-        in: formData
-        name: files[]
-        type: file
       produces:
       - application/json
       responses:
@@ -1358,7 +1377,7 @@ paths:
       consumes:
       - multipart/form-data
       parameters:
-      - description: Файл модели
+      - description: Файл модели (STL / STEP / 3MF / ZIP, до 100 МБ)
         in: formData
         name: file
         required: true
@@ -1485,7 +1504,7 @@ paths:
         name: id
         required: true
         type: string
-      - description: Файл модели (STL / STEP / 3MF / ZIP, до 20 МБ)
+      - description: Файл модели (STL / STEP / 3MF / ZIP, до 100 МБ)
         in: formData
         name: file
         required: true

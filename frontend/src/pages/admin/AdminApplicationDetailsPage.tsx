@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, CalendarDays, CircleUserRound, ExternalLink, Mail, MessageCircle } from 'lucide-react';
+import { ArrowLeft, CalendarDays, CircleUserRound, ExternalLink, Mail, MessageCircle, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { adminApplicationsApi } from '../../api/endpoints';
 import { ErrorState } from '../../components/ErrorState';
 import { FileList } from '../../components/FileList';
@@ -27,6 +27,7 @@ function contactURL(value: string, service: 'telegram' | 'max'): string {
 
 export function AdminApplicationDetailsPage() {
   const { id = '' } = useParams();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<ApplicationStatus | ''>('');
   const [comment, setComment] = useState('');
@@ -45,6 +46,13 @@ export function AdminApplicationDetailsPage() {
       });
     },
     onSuccess: async () => { setComment(''); setRejectionReason(''); await queryClient.invalidateQueries({ queryKey: ['admin-application', id] }); await queryClient.invalidateQueries({ queryKey: ['admin-applications'] }); },
+  });
+  const remove = useMutation({
+    mutationFn: () => adminApplicationsApi.delete(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['admin-applications'] });
+      navigate('/admin/applications', { replace: true });
+    },
   });
   const download = async (file: FileMeta) => {
     setDownloadingId(file.id);
@@ -65,5 +73,6 @@ export function AdminApplicationDetailsPage() {
     {app.rejection_reason ? <Alert><strong>Причина отклонения:</strong> {app.rejection_reason}</Alert> : null}
     <div className="details-grid"><Card className="detail-card"><h2>Файлы</h2><FileList files={app.files} onDownload={download} downloadingId={downloadingId} />{app.file_url ? <a className="external-file-link" href={app.file_url} target="_blank" rel="noreferrer"><ExternalLink size={17} /> Открыть файл по ссылке</a> : null}{downloadError ? <Alert>{downloadError}</Alert> : null}</Card><Card className="detail-card detail-card--wide"><h2>История</h2><div className="timeline">{app.status_history.map((entry, index) => <div className="timeline-item" key={`${entry.created_at}-${index}`}><span className="timeline-dot" /><div><strong>{STATUS_LABELS[entry.status]}</strong><span className="timeline-meta"><CalendarDays size={14} /> {formatDateTime(entry.created_at)} · {entry.changed_by ? `${entry.changed_by.full_name || 'Без имени'} (${entry.changed_by.role === 'admin' ? 'администратор' : 'пользователь'})` : 'Системное изменение'}</span>{entry.comment ? <p>{entry.comment}</p> : null}</div></div>)}</div></Card></div>
     <Card className="status-editor"><h2>Изменить статус или добавить комментарий</h2>{app.status === 'cancelled' ? <Alert tone="warning">Отменённая заявка финальна и не может менять статус.</Alert> : <div className="form-stack"><label className="field"><span>Новый статус</span><select value={selectedStatus} onChange={(event) => setStatus(event.target.value as ApplicationStatus)}>{canRepeatCurrentStatus ? <option value={app.status}>{STATUS_LABELS[app.status]} — текущий</option> : <option value="">Выберите статус</option>}{ADMIN_SETTABLE_STATUSES.filter((item) => item !== app.status).map((item) => <option key={item} value={item}>{STATUS_LABELS[item]}</option>)}</select></label><label className="field"><span>Комментарий {sameStatus ? '(обязателен без смены статуса)' : '(необязательно)'}</span><textarea rows={3} value={comment} onChange={(event) => setComment(event.target.value)} /></label>{selectedStatus === 'rejected' ? <label className="field"><span>Причина отклонения</span><textarea rows={3} value={rejectionReason} onChange={(event) => setRejectionReason(event.target.value)} /></label> : null}{update.isError ? <Alert>{getErrorMessage(update.error)}</Alert> : null}<Button disabled={invalid} loading={update.isPending} onClick={() => update.mutate()}>Сохранить изменение</Button></div>}</Card>
+    <div className="danger-zone"><div><strong>Полное удаление заявки</strong><p>Заявка, история и все загруженные файлы будут удалены без возможности восстановления.</p></div><div>{remove.isError ? <Alert>{getErrorMessage(remove.error)}</Alert> : null}<Button variant="danger" loading={remove.isPending} onClick={() => { if (window.confirm(`Удалить заявку «${app.title}» полностью?`)) remove.mutate(); }}><Trash2 size={17} /> Удалить заявку</Button></div></div>
   </div>;
 }

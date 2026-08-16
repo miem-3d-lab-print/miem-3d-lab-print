@@ -139,7 +139,7 @@ func run(logger *slog.Logger) error {
 	materialHandler.Register(apiMux, authMW, consentMW, adminMW)
 	adminHandler.Register(apiMux, authMW, adminMW)
 
-	apiMux.HandleFunc("GET /api/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {
+	apiMux.HandleFunc("GET /swagger", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/yaml; charset=utf-8")
 		w.Header().Set("Content-Disposition", "inline; filename=openapi.yaml")
 		_, _ = w.Write(openapiYAML)

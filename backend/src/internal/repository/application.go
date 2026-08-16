@@ -20,6 +20,18 @@ type ApplicationRepository interface {
 	CountActive(tx DBTX, userID uuid.UUID) (int, error)
 	CancelAtomic(tx DBTX, id, userID uuid.UUID, filesDeleteAfter time.Time) (*models.Application, error)
 	UpdateStatus(tx DBTX, id uuid.UUID, status string, rejectionReason *string, filesDeleteAfter *time.Time) (*models.Application, error)
+	Delete(tx DBTX, id uuid.UUID) error
+}
+
+func (repository *GORMApplicationRepository) Delete(tx DBTX, id uuid.UUID) error {
+	result := tx.Delete(&models.Application{}, "id = ?", id)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }
 
 type GORMApplicationRepository struct {

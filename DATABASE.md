@@ -299,7 +299,7 @@ Refresh-токены с поддержкой rotation и обнаружения 
 | Цвет согласован с `color_matters` | CHECK `color_consistency` |
 | `rejection_reason` обязателен для `rejected` | CHECK `rejection_reason_check` |
 | `consent_given_at` заполнен при `consent_given=true` | CHECK `users_consent_check` |
-| Размер файла: 1–20 МБ | CHECK `size > 0 AND size <= 20971520` |
+| Размер файла: 1–100 МБ | CHECK `size > 0 AND size <= 104857600` |
 | Не более 5 попыток OTP | CHECK `attempts BETWEEN 0 AND 5` |
 | Нельзя удалить последнего admin | Транзакция + SELECT FOR UPDATE в сервисе |
 | Не более 10 активных заявок на пользователя | Проверка в сервисе внутри транзакции |

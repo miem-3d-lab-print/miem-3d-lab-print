@@ -125,6 +125,7 @@ export const adminApplicationsApi = {
   get: async (id: string) => (await apiClient.get<AdminApplicationDetails>(`/admin/applications/${id}`)).data,
   updateStatus: async (id: string, payload: AdminStatusPatch) =>
     (await apiClient.patch<AdminStatusPatchResponse>(`/admin/applications/${id}/status`, payload)).data,
+  delete: async (id: string) => apiClient.delete(`/admin/applications/${id}`),
   downloadFile: async (applicationId: string, fileId: string) =>
     apiClient.get<Blob>(`/admin/applications/${applicationId}/files/${fileId}`, { responseType: 'blob', timeout: FILE_TRANSFER_TIMEOUT }),
 };
